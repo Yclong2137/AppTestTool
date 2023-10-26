@@ -1,0 +1,77 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "group": "ltd.qisi.adapterproxy",
+    "module": "app-test-plugin",
+    "version": "0.0.5-SNAPSHOT",
+    "attributes": {
+      "org.gradle.status": "integration"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "6.5",
+      "buildId": "ycefaqxkh5hwjetekpr2sy7smm"
+    }
+  },
+  "variants": [
+    {
+      "name": "apiElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api"
+      },
+      "files": [
+        {
+          "name": "app-test-plugin-0.0.5-SNAPSHOT.jar",
+          "url": "app-test-plugin-0.0.5-SNAPSHOT.jar",
+          "size": 61043,
+          "sha512": "37f61b28112efc84207078b409d36643b0eae3c60630cf59c7dc1de03a48c4aaf21145eea34c6630a96c517f94e2f4f5c147c2c835be29b678f385bf9bb2f4df",
+          "sha256": "afafa42fa96d2bfd251ccb6ba3c6c86ed76c96aa75e133f8d139519f66da0684",
+          "sha1": "3d71047a402e9e9b21c577d9bfaf1411455815a3",
+          "md5": "0081e644f091e19582b3a573789499fe"
+        }
+      ]
+    },
+    {
+      "name": "runtimeElements",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.jvm.version": 11,
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime"
+      },
+      "dependencies": [
+        {
+          "group": "com.android.tools.build",
+          "module": "gradle",
+          "version": {
+            "requires": "4.1.3"
+          }
+        },
+        {
+          "group": "org.ow2.asm",
+          "module": "asm",
+          "version": {
+            "requires": "9.2"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "app-test-plugin-0.0.5-SNAPSHOT.jar",
+          "url": "app-test-plugin-0.0.5-SNAPSHOT.jar",
+          "size": 61043,
+          "sha512": "37f61b28112efc84207078b409d36643b0eae3c60630cf59c7dc1de03a48c4aaf21145eea34c6630a96c517f94e2f4f5c147c2c835be29b678f385bf9bb2f4df",
+          "sha256": "afafa42fa96d2bfd251ccb6ba3c6c86ed76c96aa75e133f8d139519f66da0684",
+          "sha1": "3d71047a402e9e9b21c577d9bfaf1411455815a3",
+          "md5": "0081e644f091e19582b3a573789499fe"
+        }
+      ]
+    }
+  ]
+}

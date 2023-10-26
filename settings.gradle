@@ -1,0 +1,4 @@
+rootProject.name = "AppTestTool"
+include ':app'
+include ':QisiAdapterTestSDK'
+include ':test-gradle-plugin'
