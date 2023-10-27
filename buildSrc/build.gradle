@@ -24,15 +24,19 @@ sourceSets {
     }
 }
 
-//获取maven私服账户名
-def getRepositoryUsername() {
-    return hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : ""
+//maven私服账户名
+def nexusUserName
+//maven私服密码
+def nexusPassword
+Properties properties = new Properties()
+try {
+    properties.load(new File(rootDir, "local.properties").newDataInputStream())
+    nexusUserName = properties.getProperty("NEXUS_USERNAME")
+    nexusPassword = properties.getProperty("NEXUS_PASSWORD")
+} catch (Exception e) {
+    e.printStackTrace()
 }
 
-//获取maven私服密码
-def getRepositoryPassword() {
-    return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
-}
 
 //发布前先执行 clean, 避免发布的aar中使用了旧的缓存代码
 publish.dependsOn clean
@@ -56,8 +60,8 @@ afterEvaluate {
                 url = VERSION_COMMON_NAME.endsWith("SNAPSHOT") ? SNAPSHOT_REPOSITORY_URL : RELEASE_REPOSITORY_URL
 
                 credentials {
-                    username getRepositoryUsername()
-                    password getRepositoryPassword()
+                    username nexusUserName
+                    password nexusPassword
                 }
             }
 
