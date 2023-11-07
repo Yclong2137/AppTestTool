@@ -3,13 +3,9 @@ package ltd.qisi.test.items;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
-import org.w3c.dom.Text;
-
-import ltd.qisi.test.ParameterTypeItem;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.ParameterInfo;
 

@@ -27,7 +27,7 @@ public class BooleanTypeItem extends SelectionTypeItem<Boolean> {
     }
 
     @Override
-    protected Boolean defaultValue() {
+    public Boolean defaultValue() {
         return true;
     }
 }

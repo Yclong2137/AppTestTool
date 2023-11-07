@@ -26,7 +26,7 @@ public class IntTypeItem extends InputTypeItem<Integer> {
     }
 
     @Override
-    protected Integer defaultValue() {
+    public Integer defaultValue() {
         return 0;
     }
 }

@@ -19,7 +19,7 @@ public class StringTypeItem extends InputTypeItem<String> {
     }
 
     @Override
-    protected String defaultValue() {
+    public String defaultValue() {
         return "";
     }
 }

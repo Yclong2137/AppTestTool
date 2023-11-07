@@ -8,7 +8,6 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-import ltd.qisi.test.ParameterTypeItem;
 import ltd.qisi.test.bean.ParameterInfo;
 
 /**

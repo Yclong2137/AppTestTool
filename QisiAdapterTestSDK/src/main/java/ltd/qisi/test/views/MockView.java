@@ -94,6 +94,12 @@ public class MockView extends FrameLayout {
     private void initMethodView(Context context) {
         rvRight = findViewById(R.id.rv_methods);
         tvMethodArea = findViewById(R.id.tv_method_area);
+        findViewById(R.id.btn_test_auto).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                autoTest();
+            }
+        });
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rvRight.setLayoutManager(layoutManager);
         methodAdapter = new MethodAdapter();
@@ -116,6 +122,20 @@ public class MockView extends FrameLayout {
                 Log.i(TAG, "onTextChanged() called with: text = [" + text + "]");
                 key = text;
                 methodAdapter.setData(methodSpecs, text);
+            }
+        });
+    }
+
+    /**
+     * 自动化测试所有接口
+     */
+    private void autoTest() {
+        mExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                for (MethodSpec methodSpec : methodSpecs) {
+                    methodSpec.invoke(false);
+                }
             }
         });
     }

@@ -1,14 +1,12 @@
 package ltd.qisi.test;
 
 
-import android.util.Log;
-
-
 import ltd.qisi.test.items.BooleanTypeItem;
 import ltd.qisi.test.items.DoubleTypeItem;
 import ltd.qisi.test.items.FloatTypeItem;
 import ltd.qisi.test.items.IntTypeItem;
 import ltd.qisi.test.items.LongTypeItem;
+import ltd.qisi.test.items.ParameterTypeItem;
 import ltd.qisi.test.items.ShortTypeItem;
 import ltd.qisi.test.items.StringTypeItem;
 import ltd.qisi.test.bean.ParameterInfo;

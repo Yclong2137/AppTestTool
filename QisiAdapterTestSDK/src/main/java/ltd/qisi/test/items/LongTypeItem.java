@@ -23,7 +23,7 @@ public class LongTypeItem extends InputTypeItem<Long> {
     }
 
     @Override
-    protected Long defaultValue() {
+    public Long defaultValue() {
         return 0L;
     }
 }

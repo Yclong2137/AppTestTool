@@ -1,4 +1,4 @@
-package ltd.qisi.test;
+package ltd.qisi.test.items;
 
 import android.content.Context;
 import android.view.View;
@@ -42,7 +42,7 @@ public abstract class ParameterTypeItem<T> {
     /**
      * 默认值
      */
-    protected T defaultValue() {
+    public T defaultValue() {
         return null;
     }
 

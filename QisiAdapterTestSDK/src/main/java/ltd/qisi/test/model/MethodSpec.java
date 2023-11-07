@@ -11,13 +11,12 @@ import org.greenrobot.eventbus.EventBus;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import ltd.qisi.test.annotaitons.MockBody;
 import ltd.qisi.test.annotaitons.MockField;
 import ltd.qisi.test.annotaitons.MockMethod;
 import ltd.qisi.test.MockClient;
-import ltd.qisi.test.ParameterTypeItem;
+import ltd.qisi.test.items.ParameterTypeItem;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.MethodInvokeInfo;
 import ltd.qisi.test.bean.ParameterInfo;
@@ -210,7 +209,13 @@ public class MethodSpec {
                 }
                 for (int i = 0; i < typeItems.length; i++) {
                     ParameterTypeItem<?> typeItem = typeItems[i];
-                    args[i] = typeItem.getValue();
+                    Object arg = typeItem.getValue();
+                    Object defVal;
+                    if (arg == null && (defVal = typeItem.defaultValue()) != null) {
+                        args[i] = defVal;
+                    } else {
+                        args[i] = arg;
+                    }
                 }
                 reqText.clear();
                 reqText.append(MockClient.getTextFormatter().format(args));

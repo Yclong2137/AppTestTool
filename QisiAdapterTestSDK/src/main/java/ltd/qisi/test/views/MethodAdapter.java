@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ltd.qisi.test.MockClient;
-import ltd.qisi.test.ParameterTypeItem;
+import ltd.qisi.test.items.ParameterTypeItem;
 import ltd.qisi.test.R;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.annotaitons.MockMethod;

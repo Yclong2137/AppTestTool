@@ -1,5 +1,6 @@
 package ltd.qisi.test.items;
 
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
@@ -97,7 +98,7 @@ public class BodyTypeItem extends InputTypeItem<Object> {
     }
 
     @Override
-    protected Object defaultValue() {
+    public Object defaultValue() {
         return template;
     }
 

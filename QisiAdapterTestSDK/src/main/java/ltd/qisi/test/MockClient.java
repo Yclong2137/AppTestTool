@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import java.util.Arrays;
 
 import ltd.qisi.test.bean.ParameterInfo;
+import ltd.qisi.test.items.ParameterTypeItem;
 
 
 public final class MockClient {
@@ -85,7 +86,7 @@ public final class MockClient {
             try {
                 result = sGson.toJson(args);
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 result = Arrays.toString(args);
             }
             return result;

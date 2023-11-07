@@ -28,7 +28,7 @@ public class ShortTypeItem extends InputTypeItem<Short> {
     }
 
     @Override
-    protected Short defaultValue() {
+    public Short defaultValue() {
         return 0;
     }
 }

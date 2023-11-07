@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import ltd.qisi.test.ParameterTypeItem;
 import ltd.qisi.test.bean.ParameterInfo;
 
 /**

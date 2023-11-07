@@ -28,7 +28,7 @@ public class DoubleTypeItem extends InputTypeItem<Double> {
     }
 
     @Override
-    protected Double defaultValue() {
+    public Double defaultValue() {
         return 0d;
     }
 }

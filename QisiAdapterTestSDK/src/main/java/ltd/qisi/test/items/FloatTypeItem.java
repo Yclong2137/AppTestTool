@@ -29,7 +29,7 @@ public class FloatTypeItem extends InputTypeItem<Float> {
     }
 
     @Override
-    protected Float defaultValue() {
+    public Float defaultValue() {
         return 0f;
     }
 }
