@@ -11,15 +11,19 @@
 
 #### 2.原理
 
-1.通过反射获取目标类的方法和参数；
+1、通过插件自动收集功能测试类注册，并对功能模块进行方法排序收集
 
-2.将方法集合UI化，并针对每一个方法对其参数列表进行UI化，
+2、反射获取目标类的方法和参数；
 
-3.点击测试按钮收集参数信息进行回填后反射调用目标方法
+3、将方法集合UI化，并针对每一个方法对其参数列表进行UI化，
+
+4、点击测试按钮收集参数信息进行回填后反射调用目标方法
 
 
 
 #### 3.关键类解析
+
+
 
 ##### 1、注解
 
@@ -45,7 +49,15 @@ public @interface Mock {
 @Target(ElementType.METHOD)
 public @interface MockMethod {
 
+    /**
+     * 方法描述
+     */
     String desc();
+
+    /**
+     * 已通过扫描插件自动实现
+     */
+    @Deprecated int order() default Integer.MAX_VALUE;
 
 }
 ```
@@ -82,198 +94,28 @@ public @interface MockField {
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.PARAMETER)
 public @interface MockBody {
-
-}
-```
-
-##### 2、方法抽象化
-
-```java
-/**
- * @author Yclong
- */
-public class MethodSpec {
-
-
-    public static MethodSpec create(Object caller, Method method) {
-        return new MethodSpec(caller, method);
-    }
-
-    /**
-     * 参数
+	/**
+     * 原始类型
      */
-    private final Object[] args;
-    /**
-     * 调用者
-     */
-    public Object caller;
-    /**
-     * 方法
-     */
-    public Method method;
-    /**
-     * 参数映射类型
-     */
-    private final ParameterTypeItem<?>[] typeItems;
-
-    private Callback callback;
-    /**
-     * 参数类型
-     */
-    private final Class<?>[] parameterTypes;
-    /**
-     * 注解
-     */
-    private final MockMethod mockMethod;
-
-
-    private MethodSpec(Object caller, Method method) {
-        this.caller = caller;
-        this.method = method;
-        mockMethod = findMockAnnotation(method.getAnnotations(), MockMethod.class);
-        parameterTypes = method.getParameterTypes();
-        args = new Object[parameterTypes.length];
-        typeItems = new ParameterTypeItem[parameterTypes.length];
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        for (int i = 0; i < parameterTypes.length; i++) {
-            ParameterInfo parameterInfo = new ParameterInfo();
-            Class<?> parameterType = parameterTypes[i];
-            parameterInfo.parameterType = parameterType;
-            Annotation[] parameterAnnotationArr = parameterAnnotations[i];
-            System.out.println(method.getName() + " ,参数类型：" + parameterType + " ,注解：" + Arrays.toString(parameterAnnotationArr));
-            parameterInfo.mockField = findMockAnnotation(parameterAnnotationArr, MockField.class);
-            parameterInfo.mockBody = findMockAnnotation(parameterAnnotationArr, MockBody.class);
-            try {
-                if (parameterType.isInterface()) {//处理接口类型参数
-                    Object proxy = Proxy.newProxyInstance(parameterType.getClassLoader(), new Class[]{parameterType}, new InvocationHandler() {
-                        @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            if (method.getDeclaringClass() == Object.class) {
-                                return method.invoke(this, args);
-                            }
-                            EventBus.getDefault().post(MethodCallbackInfo.create(method, args));
-                            return null;
-                        }
-                    });
-                    InterfaceTypeItem typeItem = new InterfaceTypeItem(proxy, parameterInfo);
-                    typeItems[i] = typeItem;
-                } else if (parameterInfo.mockBody != null && Utils.isInstance(parameterType)) {
-                    BodyTypeItem bodyTypeItem = new BodyTypeItem(parameterInfo);
-                    typeItems[i] = bodyTypeItem;
-                } else {
-                    typeItems[i] = MockClient.getTypeItem(parameterType, parameterInfo);
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (callback != null) callback.onFailure(MockClient.getTextFormatter().format(e));
-            }
-        }
-
-    }
-
-
-    /**
-     * 查找注解
-     *
-     * @param annotations 注解
-     * @return 目标注解
-     */
-    private <T extends Annotation> T findMockAnnotation(Annotation[] annotations, Class<T> annotationClazz) {
-        if (annotations != null && annotations.length > 0) {
-            for (Annotation annotation : annotations) {
-                if (annotation.annotationType() == annotationClazz) {
-                    return (T) annotation;
-                }
-            }
-        }
-        return null;
-    }
-
-
-    public void setCallback(Callback callback) {
-        this.callback = callback;
-    }
-
-
-    public MockMethod getMockMethod() {
-        return mockMethod;
-    }
+    Class<?> rawType() default Void.class;
 
     /**
      * 参数类型
      */
-    public Class<?>[] getParameterTypes() {
-        return parameterTypes;
-    }
+    Class<?>[] type() default {};
 
     /**
-     * 获取映射参数类型
+     * 模版（json格式）
      */
-    public ParameterTypeItem<?>[] getTypeItems() throws Exception {
-        StringBuilder builder = new StringBuilder();
-        //检查参数是否匹配
-        boolean healthy = true;
-        for (int i = 0; i < parameterTypes.length; i++) {
-            Class<?> parameterType = parameterTypes[i];
-            ParameterTypeItem<?> typeItem = typeItems[i];
-            if (!parameterType.isInterface() && typeItem == null) {
-                healthy = false;
-                builder.append("parameter type(");
-                builder.append(parameterType);
-                builder.append(") is lost, please call registerParameterType()");
-            }
-        }
-        if (healthy) {
-            return typeItems;
-        }
-        if (callback != null)
-            callback.onFailure(MockClient.getTextFormatter().format(builder.toString()));
-        throw new IllegalAccessException(builder.toString());
-    }
-
-    /**
-     * 执行方法
-     */
-    public Object invoke() {
-        if (method != null) {
-            try {
-                for (int i = 0; i < typeItems.length; i++) {
-                    ParameterTypeItem<?> typeItem = typeItems[i];
-                    args[i] = typeItem.getValue();
-                }
-                if (callback != null)
-                    callback.onReqChanged(MockClient.getTextFormatter().format(args));
-                Object resp = method.invoke(caller, args);
-                if (callback != null)
-                    callback.onRespChanged(MockClient.getTextFormatter().format(resp));
-                return resp;
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (callback != null) callback.onFailure(MockClient.getTextFormatter().format(e));
-            }
-        }
-        return null;
-    }
-
-
-    public interface Callback {
-
-        void onReqChanged(String req);
-
-        void onRespChanged(String resp);
-
-        void onFailure(String msg);
-
-    }
-
+    String template() default "";
 }
-
 ```
 
 
 
-##### 3、参数抽象化
+
+
+##### 2、参数抽象化
 
 ```java
 /**
@@ -282,7 +124,9 @@ public class MethodSpec {
  */
 public abstract class ParameterTypeItem<T> {
 
-
+	/**
+     * 参数信息
+     */
     protected ParameterInfo parameterInfo;
 
     public ParameterTypeItem(ParameterInfo parameterInfo) {
@@ -299,7 +143,7 @@ public abstract class ParameterTypeItem<T> {
     /**
      * 自定义View尺寸
      */
-    protected LinearLayout.LayoutParams getLayoutParams() {
+    public LinearLayout.LayoutParams getLayoutParams() {
         return null;
     }
 
@@ -308,6 +152,12 @@ public abstract class ParameterTypeItem<T> {
      */
     public abstract T getValue() throws Exception;
 
+    /**
+     * 默认值
+     */
+    protected T defaultValue() {
+        return null;
+    }
 
     /**
      * 参数信息
@@ -346,7 +196,16 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
         inputView.setPadding(Utils.dp2px(12), Utils.dp2px(2), Utils.dp2px(12), Utils.dp2px(2));
         inputView.setHint("请输入");
         inputView.setTextSize(18);
+        inputView.clearFocus();
         hookView(inputView);
+        try {
+            Object value;
+            if ((value = parameterInfo.value) != null || (value = defaultValue()) != null) {
+                inputView.setText(String.valueOf(value));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return inputView;
     }
 
@@ -358,7 +217,9 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
      * 输入文本
      */
     protected String getInputText() {
-        return inputView.getText().toString();
+        String value = inputView.getText().toString();
+        parameterInfo.value = value;
+        return value;
     }
 }
 ```
@@ -388,17 +249,31 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
         background.setColor(Color.GRAY);
         background.setCornerRadius(6);
         spinner.setBackground(background);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, fillData());
+        List<Entry> entries = fillEntries();
+        List<String> items = new ArrayList<>();
+        int defaultItemIndex = 0;
+        T defaultValue = defaultValue();
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            items.add(entry.name);
+            if (Objects.equals(defaultValue, entry.data)) {
+                defaultItemIndex = i;
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setSelection(defaultItemIndex);
         hookView(spinner);
         return spinner;
     }
 
+
     /**
      * 填充数据
      */
-    protected abstract List<String> fillData();
+    protected abstract List<Entry> fillEntries();
+
 
     protected void hookView(Spinner spinner) {
 
@@ -410,6 +285,18 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
      */
     protected String getSelectedText() {
         return spinner.getSelectedItem().toString();
+    }
+
+    public class Entry {
+
+        public String name;
+
+        public T data;
+
+        public Entry(String name, T data) {
+            this.name = name;
+            this.data = data;
+        }
     }
 }
 ```
@@ -425,19 +312,34 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
 public class InterfaceTypeItem extends ParameterTypeItem<Object> {
 
     /**
-     * 接口代理对象
+     * cache
      */
-    private final Object proxy;
+    private static final Map<Class<?>, Object> CACHES = new HashMap<>();
 
-    public InterfaceTypeItem(Object proxy, ParameterInfo parameterInfo) {
+    private final InvocationHandler handler;
+
+    private final Class<?> parameterType;
+
+    public InterfaceTypeItem(ParameterInfo parameterInfo, InvocationHandler handler) {
         super(parameterInfo);
-        this.proxy = proxy;
+        this.parameterType = parameterInfo.parameterType;
+        this.handler = handler;
     }
+
 
     @Override
     public Object getValue() throws Exception {
-        return proxy;
+        Object value = null;
+        if (parameterType != null) {
+            value = CACHES.get(parameterType);
+            if (value == null) {
+                value = Proxy.newProxyInstance(parameterType.getClassLoader(), new Class[]{parameterType}, handler);
+                CACHES.put(parameterType, value);
+            }
+        }
+        return value;
     }
+
 
     @Override
     public View getView(Context context) {
@@ -472,37 +374,92 @@ public class BodyTypeItem extends InputTypeItem<Object> {
 
 
     private final Class<?> parameterType;
+    /**
+     * 参数类型
+     */
+    private Type pType;
+
+    private String template;
 
     public BodyTypeItem(ParameterInfo parameterInfo) {
         super(parameterInfo);
         this.parameterType = parameterInfo.parameterType;
+        pType = TypeToken.get(parameterType).getType();
+        MockBody mockBody = parameterInfo.mockBody;
+        if (mockBody != null) {
+            Class<?> rawType = mockBody.rawType();
+            Class<?>[] types = mockBody.type();
+            template = mockBody.template();
+            if (parameterType == rawType) {
+                pType = TypeToken.getParameterized(rawType, types).getType();
+                if ((template = formatTemplate(template, pType)) == null && List.class.isAssignableFrom(parameterType) && types.length > 0) {
+                    template = createListTemplate(types[0]);
+                }
+            } else {
+                if ((template = formatTemplate(template, parameterType)) == null) {
+                    template = createTemplate(parameterType);
+                }
+            }
+        }
+    }
+
+    /**
+     * 格式化模版
+     *
+     * @param template
+     * @param type
+     * @return
+     */
+    private String formatTemplate(String template, Type type) {
+        if (template == null || template.isEmpty() || type == null) {
+            return null;
+        }
+        try {
+            Object o = gson.fromJson(template, type);
+            return gson.toJson(o);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
-    protected LinearLayout.LayoutParams getLayoutParams() {
+    public LinearLayout.LayoutParams getLayoutParams() {
         return new LinearLayout.LayoutParams(-1, -2);
     }
 
     @Override
-    protected void hookView(EditText inputView) {
-        inputView.setText(createTemplate(parameterType));
+    protected Object defaultValue() {
+        return template;
     }
 
     @Override
     public Object getValue() throws Exception {
+        if (pType != null) {
+            return gson.fromJson(getInputText(), pType);
+        }
         return gson.fromJson(getInputText(), parameterType);
+    }
+
+    private String createListTemplate(Class<?> type) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append(createTemplate(type));
+        sb.append("]");
+        return sb.toString();
     }
 
     /**
      * 创建模版
      *
-     * @param clazz
+     * @param type
      * @return
      */
-    private String createTemplate(Class<?> clazz) {
-        if (clazz == null) return "";
+    private String createTemplate(Class<?> type) {
+        if (type == null || type.isInterface() || Modifier.isAbstract(type.getModifiers()))
+            return "";
         try {
-            Constructor<?> constructor = clazz.getConstructor();
+            Constructor<?> constructor = type.getConstructor();
             constructor.setAccessible(true);
             Object obj = constructor.newInstance();
             initDefaultValue(obj);
@@ -555,9 +512,80 @@ public class BodyTypeItem extends InputTypeItem<Object> {
 
 ##### 4、使用
 
-1、导入QisiAdapterTestSDK，app-test-plugin插件（自动扫描功能类以及实现方法排序）
+1、准备
 
-2、  **功能类实现FunctionModuleInterface接口**并在功能类中使用 `@Mock` `@MockMethod`、`@MockField`、`@MockBody` 等注解进行标注（**可选**）
+```
+//导入插件
+classpath 'ltd.qisi.adapterproxy:app-test-plugin:0.0.5-SNAPSHOT'
+
+//使用插件
+apply plugin: 'ltd.qisi.test'
+
+appTest {
+	//功能模块注册中心 （一般不改动）
+    injectClassName 'ltd/qisi/test/FunctionModuleRegistry'
+    //功能模块接口 （一般不改动）
+    scanInterface 'ltd/qisi/test/FunctionModuleInterface'//一般不改动
+    //匹配正则 （需要处理的class文件）
+    includePatterns 'ltd/qisi/adapterproxy/.*Test$', 'ltd/qisi/test/FunctionModuleRegistry'
+}
+
+//导入测试SDK
+implementation 'ltd.qisi.adapterproxy:app-test-core:0.0.1-SNAPSHOT'
+
+```
+
+2、  实现功能模块测试类
+
+```java
+//功能模块测试类
+public class CarHealthManagerTest extends CarHealthManager 
+    //实现功能模块接口
+    implements FunctionModuleInterface{
+    //接口参数类型
+    @MockMethod(desc = "注册监听器")
+    public void registerCarChangeListener(ICarVehicleHealthStateChangeListener listener){
+        super.registerCarChangeListener(listener);
+    }
+    //枚举参数类型
+    @MockMethod(desc = "获取XXX状态")
+    public int getXXXState(@MockField(name="座椅位置") 
+                           SeatPosition pos){
+        ...
+    }
+    //基本类型和基本类型的包装类
+    @MockMethod(desc = "获取XXX状态")
+    public int getXXXXState1(@MockField(name="a")
+                             int a,
+                             short b,
+                             long c,
+                             double d，
+                             boolean e,
+                             Boolean f){
+        ...
+    }
+    //普通对象（结构体）参数类型
+    @MockMethod(desc = "获取XXX状态")
+    public int getXXXState2(@MockField(name="用户")
+                            @MockBody
+                            User user){
+        ...
+    }
+    
+    //集合参数化类型
+    @MockMethod(desc = "获取XXX状态")
+    public int getXXXState3(@MockField(name="多用户") 
+                            @MockBody(rawType = List.class,type={User.class})
+                            List<User> userList){
+        ...
+    }
+    
+    ...
+    
+}
+```
+
+
 
 3、注册对应参数类型（**已实现常用基本类型、包装类型、接口类型和使用`@MockBody` 标记的结构体**）
 

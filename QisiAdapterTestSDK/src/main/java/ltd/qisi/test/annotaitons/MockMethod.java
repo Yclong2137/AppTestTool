@@ -13,8 +13,13 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface MockMethod {
-
+    /**
+     * 方法描述
+     */
     String desc();
 
+    /**
+     * 已通过扫描插件自动实现
+     */
     @Deprecated int order() default Integer.MAX_VALUE;
 }

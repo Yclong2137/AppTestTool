@@ -11,7 +11,9 @@ import ltd.qisi.test.bean.ParameterInfo;
  */
 public abstract class ParameterTypeItem<T> {
 
-
+    /**
+     * 参数信息
+     */
     protected ParameterInfo parameterInfo;
 
     public ParameterTypeItem(ParameterInfo parameterInfo) {
@@ -37,6 +39,9 @@ public abstract class ParameterTypeItem<T> {
      */
     public abstract T getValue() throws Exception;
 
+    /**
+     * 默认值
+     */
     protected T defaultValue() {
         return null;
     }
