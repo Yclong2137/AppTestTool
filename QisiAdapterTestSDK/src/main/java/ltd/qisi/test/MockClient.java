@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.Arrays;
-import java.util.List;
 
 import ltd.qisi.test.bean.ParameterInfo;
 
@@ -82,7 +81,14 @@ public final class MockClient {
          */
         @Override
         public String format(Object[] args) {
-            return Arrays.toString(args);
+            String result = null;
+            try {
+                result = sGson.toJson(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+                result = Arrays.toString(args);
+            }
+            return result;
         }
     };
 

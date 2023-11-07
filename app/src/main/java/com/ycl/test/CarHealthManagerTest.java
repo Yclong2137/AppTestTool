@@ -24,7 +24,7 @@ public class CarHealthManagerTest implements FunctionModuleInterface {
     }
 
     @MockMethod(desc = "testBody")
-    public void testBody(@MockBody User user) {
+    public void testBody(int a,@MockBody User user) {
 
     }
 
