@@ -3,8 +3,11 @@ package ltd.qisi.test.items;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+
+import org.w3c.dom.Text;
 
 import ltd.qisi.test.ParameterTypeItem;
 import ltd.qisi.test.Utils;
@@ -36,8 +39,13 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
         inputView.setTextSize(18);
         inputView.clearFocus();
         hookView(inputView);
-        if (parameterInfo.value != null) {
-            inputView.setText(String.valueOf(parameterInfo.value));
+        try {
+            Object value;
+            if ((value = parameterInfo.value) != null || (value = defaultValue()) != null) {
+                inputView.setText(String.valueOf(value));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return inputView;
     }

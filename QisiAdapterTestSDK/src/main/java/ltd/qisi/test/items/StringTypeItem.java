@@ -17,4 +17,9 @@ public class StringTypeItem extends InputTypeItem<String> {
     public String getValue() throws Exception {
         return getInputText();
     }
+
+    @Override
+    protected String defaultValue() {
+        return "";
+    }
 }

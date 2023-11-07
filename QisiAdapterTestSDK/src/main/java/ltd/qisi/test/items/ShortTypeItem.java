@@ -13,7 +13,6 @@ import ltd.qisi.test.bean.ParameterInfo;
 public class ShortTypeItem extends InputTypeItem<Short> {
 
 
-
     public ShortTypeItem(ParameterInfo parameterInfo) {
         super(parameterInfo);
     }
@@ -26,5 +25,10 @@ public class ShortTypeItem extends InputTypeItem<Short> {
     @Override
     public Short getValue() throws Exception {
         return Short.parseShort(getInputText());
+    }
+
+    @Override
+    protected Short defaultValue() {
+        return 0;
     }
 }

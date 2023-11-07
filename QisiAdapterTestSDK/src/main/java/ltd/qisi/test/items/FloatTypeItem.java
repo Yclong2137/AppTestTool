@@ -27,4 +27,9 @@ public class FloatTypeItem extends InputTypeItem<Float> {
     public Float getValue() throws Exception {
         return Float.parseFloat(getInputText());
     }
+
+    @Override
+    protected Float defaultValue() {
+        return 0f;
+    }
 }

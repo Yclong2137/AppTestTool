@@ -11,7 +11,6 @@ import ltd.qisi.test.bean.ParameterInfo;
 public class IntTypeItem extends InputTypeItem<Integer> {
 
 
-
     public IntTypeItem(ParameterInfo parameterInfo) {
         super(parameterInfo);
     }
@@ -24,5 +23,10 @@ public class IntTypeItem extends InputTypeItem<Integer> {
     @Override
     public Integer getValue() throws Exception {
         return Integer.parseInt(getInputText());
+    }
+
+    @Override
+    protected Integer defaultValue() {
+        return 0;
     }
 }

@@ -19,11 +19,16 @@ public class DoubleTypeItem extends InputTypeItem<Double> {
 
     @Override
     protected void hookView(EditText inputView) {
-        inputView.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL|InputType.TYPE_CLASS_NUMBER);
+        inputView.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_CLASS_NUMBER);
     }
 
     @Override
     public Double getValue() throws Exception {
         return Double.parseDouble(getInputText());
+    }
+
+    @Override
+    protected Double defaultValue() {
+        return 0d;
     }
 }

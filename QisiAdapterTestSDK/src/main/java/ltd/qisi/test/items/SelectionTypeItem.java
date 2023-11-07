@@ -7,10 +7,12 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import ltd.qisi.test.ParameterTypeItem;
 import ltd.qisi.test.bean.ParameterInfo;
-
-import java.util.List;
 
 /**
  * 选择类型参数
@@ -34,17 +36,31 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
         background.setColor(Color.GRAY);
         background.setCornerRadius(6);
         spinner.setBackground(background);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, fillData());
+        List<Entry> entries = fillEntries();
+        List<String> items = new ArrayList<>();
+        int defaultItemIndex = 0;
+        T defaultValue = defaultValue();
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
+            items.add(entry.name);
+            if (Objects.equals(defaultValue, entry.data)) {
+                defaultItemIndex = i;
+            }
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_dropdown_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setSelection(defaultItemIndex);
         hookView(spinner);
         return spinner;
     }
 
+
     /**
      * 填充数据
      */
-    protected abstract List<String> fillData();
+    protected abstract List<Entry> fillEntries();
+
 
     protected void hookView(Spinner spinner) {
 
@@ -56,5 +72,17 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
      */
     protected String getSelectedText() {
         return spinner.getSelectedItem().toString();
+    }
+
+    public class Entry {
+
+        public String name;
+
+        public T data;
+
+        public Entry(String name, T data) {
+            this.name = name;
+            this.data = data;
+        }
     }
 }

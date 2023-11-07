@@ -200,7 +200,7 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
 
         private void doReq() {
-            methodSpec.invoke();
+            methodSpec.invoke(true);
         }
 
 

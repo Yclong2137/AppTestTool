@@ -1,6 +1,5 @@
 package ltd.qisi.test.items;
 
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
@@ -98,10 +97,8 @@ public class BodyTypeItem extends InputTypeItem<Object> {
     }
 
     @Override
-    protected void hookView(EditText inputView) {
-        if (parameterInfo.value == null && template != null) {
-            inputView.setText(template);
-        }
+    protected Object defaultValue() {
+        return template;
     }
 
     @Override

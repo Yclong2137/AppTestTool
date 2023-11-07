@@ -8,7 +8,6 @@ import ltd.qisi.test.bean.ParameterInfo;
 public class LongTypeItem extends InputTypeItem<Long> {
 
 
-
     public LongTypeItem(ParameterInfo parameterInfo) {
         super(parameterInfo);
     }
@@ -23,5 +22,8 @@ public class LongTypeItem extends InputTypeItem<Long> {
         return Long.parseLong(getInputText());
     }
 
-
+    @Override
+    protected Long defaultValue() {
+        return 0L;
+    }
 }

@@ -37,6 +37,9 @@ public abstract class ParameterTypeItem<T> {
      */
     public abstract T getValue() throws Exception;
 
+    protected T defaultValue() {
+        return null;
+    }
 
     /**
      * 参数信息

@@ -17,11 +17,17 @@ public class BooleanTypeItem extends SelectionTypeItem<Boolean> {
         return Boolean.valueOf(getSelectedText());
     }
 
+
     @Override
-    protected List<String> fillData() {
-        List<String> items = new ArrayList<>();
-        items.add("true");
-        items.add("false");
+    protected List<Entry> fillEntries() {
+        List<Entry> items = new ArrayList<>();
+        items.add(new Entry("true", true));
+        items.add(new Entry("false", false));
         return items;
+    }
+
+    @Override
+    protected Boolean defaultValue() {
+        return true;
     }
 }

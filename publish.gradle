@@ -1,36 +1,5 @@
-apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 
-android {
-    compileSdkVersion 28
-    resourcePrefix "test_"
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'com.google.code.gson:gson:2.8.5'
-    api("org.greenrobot:eventbus:3.0.0")
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-}
 
 //maven私服账户名
 def nexusUserName
@@ -45,11 +14,17 @@ try {
     e.printStackTrace()
 }
 
-// 上传源码的 task
-task sourceJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    archiveClassifier = "sources"
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
+
+// 打包javadocJar任务
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 
 //发布前先执行 clean, 避免发布的aar中使用了旧的缓存代码
 publish.dependsOn clean
@@ -61,10 +36,8 @@ afterEvaluate {
                 groupId = GROUP
                 artifactId = POM_ARTIFACT_ID
                 version = VERSION_COMMON_NAME
-                //上传源码
-                artifact sourceJar
 
-                from components.release
+                from components.java
             }
         }
 

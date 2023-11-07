@@ -201,11 +201,11 @@ public class MethodSpec {
     /**
      * 执行方法
      */
-    public Object invoke() {
+    public Object invoke(boolean notify) {
         if (method != null) {
             try {
                 //校验参数
-                if (!verifyParameter(true)) {
+                if (!verifyParameter(notify)) {
                     return null;
                 }
                 for (int i = 0; i < typeItems.length; i++) {
