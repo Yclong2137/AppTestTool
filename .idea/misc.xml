@@ -3,6 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/drawable/shape_bg.xml" value="0.19583333333333333" />
+        <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/layout/test_activity_launcher.xml" value="0.1796875" />
+        <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/layout/test_item_method.xml" value="0.1796875" />
+        <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/layout/test_item_method_callback.xml" value="0.1796875" />
+        <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/layout/test_item_name_button.xml" value="0.1796875" />
         <entry key="..\:/ycl/codes/android/AppTestTool/QisiAdapterTestSDK/src/main/res/layout/test_view_mock.xml" value="0.22" />
       </map>
     </option>

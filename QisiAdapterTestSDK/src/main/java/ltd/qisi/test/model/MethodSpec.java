@@ -72,12 +72,30 @@ public class MethodSpec {
      */
     private boolean isExpand = true;
 
+    /**
+     * 搜索关键字
+     */
+    private String keyword;
+
+
+    public String getKeyword() {
+        return keyword;
+    }
+
+
+    public Object[] getArgs() {
+        return args;
+    }
 
     private MethodSpec(Object caller, Method method) {
         this.caller = caller;
         this.method = method;
+        keyword += method.getName();
         this.returnType = method.getReturnType();
         mockMethod = Utils.findMethodAnnotation(method, MockMethod.class);
+        if (mockMethod != null) {
+            keyword += mockMethod.desc();
+        }
         parameterTypes = method.getParameterTypes();
         args = new Object[parameterTypes.length];
         typeItems = new ParameterTypeItem[parameterTypes.length];

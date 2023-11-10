@@ -39,6 +39,14 @@ public class LauncherActivity extends ActivityBase {
         LinearLayoutManager layoutManager = new GridLayoutManager(this, 2);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.top = Utils.dp2px(8);
+                outRect.bottom = Utils.dp2px(8);
+            }
+        });
         FunctionModuleAdapter adapter = new FunctionModuleAdapter();
         recyclerView.setAdapter(adapter);
         adapter.setData(FunctionModuleRegistry.getModuleInfoList());

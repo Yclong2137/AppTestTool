@@ -1,10 +1,13 @@
 package ltd.qisi.test.views;
 
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,11 +49,15 @@ public class FunctionModuleAdapter extends RecyclerView.Adapter<FunctionModuleAd
 
     public static class VH extends RecyclerView.ViewHolder {
 
-        private final Button button;
+        private final TextView button;
 
         public VH(@NonNull View itemView) {
             super(itemView);
             button = itemView.findViewById(R.id.button);
+            GradientDrawable drawable = new GradientDrawable();
+            drawable.setColor(Color.parseColor("#3B4550"));
+            drawable.setCornerRadius(50);
+            itemView.setBackground(drawable);
         }
 
         public void bind(ModuleInfo moduleInfo) {

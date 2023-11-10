@@ -63,19 +63,34 @@
 
             <ltd.qisi.test.views.SearchInputView
                 android:id="@+id/search_view"
-                android:layout_width="360dp"
-                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_gravity="center_vertical"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:hint="请输入"
+                android:minWidth="240dp"
                 android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
+                android:paddingTop="0dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="0dp" />
 
             <Button
                 android:id="@+id/btn_test_auto"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="自动化测试" />
+                android:layout_marginEnd="12dp"
+                android:backgroundTint="#FF6200EE"
+                android:text="自动化测试"
+                android:textColor="@color/white" />
+
+            <CheckBox
+                android:id="@+id/rb_deprecated"
+                android:textColor="@color/white"
+                android:buttonTint="#FF6200EE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="包含废弃" />
 
 
         </LinearLayout>

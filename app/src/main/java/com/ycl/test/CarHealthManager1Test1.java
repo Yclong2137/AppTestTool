@@ -10,13 +10,13 @@ import ltd.qisi.test.annotaitons.MockBody;
 import ltd.qisi.test.annotaitons.MockMethod;
 
 @Mock(moduleName = "车辆健康")
-public class CarHealthManagerTest extends CarHealthManager1Test1 implements FunctionModuleInterface {
+public class CarHealthManager1Test1 implements FunctionModuleInterface {
 
 
     private ICarHealthStateChangeLisener mICarHealthStateChangeLisener;
 
     @MockMethod(desc = "testA(CAN)")
-    @Override
+    @Deprecated
     public void testA() {
 
     }
@@ -28,10 +28,10 @@ public class CarHealthManagerTest extends CarHealthManager1Test1 implements Func
     }
 
     @MockMethod(desc = "testBody")
+    @Deprecated
     public void testBody(int a, @MockBody User user) {
         if (mICarHealthStateChangeLisener != null)
             mICarHealthStateChangeLisener.onTestAbs(a, user,a);
-
     }
 
 

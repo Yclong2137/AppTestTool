@@ -180,6 +180,7 @@ public final class Utils {
      */
     public static <T extends Annotation> T findMethodAnnotation(Method bridgeMethod, Class<T> annotationType) {
         boolean has = bridgeMethod.isAnnotationPresent(annotationType);
+        System.out.println("findMethodAnnotation() called with: bridgeMethod = [" + bridgeMethod + "], annotationType = [" + annotationType + "],has "+has);
         if (!has) {
             Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
             while (superclass != null && Object.class != superclass) {
@@ -202,8 +203,6 @@ public final class Utils {
             return null;
         }
     }
-
-
 
 
 }

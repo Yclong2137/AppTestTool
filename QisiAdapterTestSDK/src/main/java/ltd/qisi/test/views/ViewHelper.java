@@ -34,7 +34,7 @@ public final class ViewHelper {
         LinearLayout rootView = new LinearLayout(context);
         TextView labelView = new TextView(context);
         labelView.setTextColor(Color.WHITE);
-        labelView.setTextSize(18);
+        labelView.setTextSize(17);
         MockField mockField = info.mockField;
         if (mockField == null) {
             labelView.setText(String.format("参数%d：", pIndex));

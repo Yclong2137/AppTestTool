@@ -15,7 +15,9 @@ public final class MockClient {
     private static TextFormatter sTextFormatter;
 
 
-    private static final Gson sGson = new GsonBuilder().serializeNulls().create();
+    private static final Gson sGson = new GsonBuilder()
+            .serializeNulls()
+            .create();
 
 
     private MockClient() {
@@ -57,8 +59,10 @@ public final class MockClient {
         @Override
         public String format(Object o) {
             if (o == null) return "";
+            if (o instanceof Class) {
+                return String.valueOf(o);
+            }
             Class<?> clazz = o.getClass();
-
             try {
                 if (Throwable.class.isAssignableFrom(clazz)) {
                     return Utils.getStackTraceString((Throwable) o);

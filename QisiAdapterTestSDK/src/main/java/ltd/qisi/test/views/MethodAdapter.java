@@ -3,7 +3,10 @@ package ltd.qisi.test.views;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +24,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import ltd.qisi.test.MockClient;
 import ltd.qisi.test.items.ParameterTypeItem;
@@ -38,26 +42,36 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
     private static final String TAG = "MethodAdapter";
 
+    private static final Handler sHandler = new android.os.Handler(Looper.getMainLooper());
 
     private final List<MethodSpec> methodSpecs = new ArrayList<>();
-
-    private RecyclerView recyclerView;
 
     public MethodAdapter() {
     }
 
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setData(List<MethodSpec> methodSpecs, String key) {
-        this.methodSpecs.clear();
-        for (MethodSpec methodSpec : methodSpecs) {
-            Method method = methodSpec.method;
-            if (key == null || method.getName().toLowerCase().contains(key.toLowerCase())) {
-                this.methodSpecs.add(methodSpec);
+    public void setData(List<MethodSpec> methodSpecList, String key) {
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                methodSpecs.clear();
+                for (MethodSpec methodSpec : methodSpecList) {
+                    String keyword = methodSpec.getKeyword();
+                    if (key == null || (keyword != null && keyword.toLowerCase().contains(key.toLowerCase()))) {
+                        methodSpecs.add(methodSpec);
+                    }
+                }
+                EventBus.getDefault().post(new MethodCountChangeEvent(methodSpecs.size()));
+                sHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyDataSetChanged();
+                    }
+                });
             }
-        }
-        EventBus.getDefault().post(new MethodCountChangeEvent(this.methodSpecs.size()));
-        this.notifyDataSetChanged();
+        });
+
     }
 
 
@@ -82,7 +96,6 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
     @Override
     public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        this.recyclerView = recyclerView;
         EventBus.getDefault().register(this);
     }
 
@@ -96,7 +109,6 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         EventBus.getDefault().unregister(this);
-        this.recyclerView = null;
     }
 
     @Override
@@ -119,6 +131,8 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
         private final TextView tvReqResult;
         private final TextView tvRespResult;
+
+        private static final String SUFFIX = "\t";
 
 
         VH(@NonNull View itemView) {
@@ -159,23 +173,39 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
             tvReqResult.setText(methodSpec.reqText);
             tvRespResult.setText(methodSpec.respText);
             StringBuilder builder = new StringBuilder();
-            MockMethod mockMethod = methodSpec.getMockMethod();
 
-            builder.append("\u3000")
-                    .append(getAdapterPosition() + 1)
-                    .append(" 方法名：");
-            builder.append(methodSpec.method.getName());
+            //builder.append("\t").append("方法签名：");
+            MockMethod mockMethod = methodSpec.getMockMethod();
             if (mockMethod != null) {
-                builder.append("(");
+                builder.append("\t").append("方法描述: ");
                 builder.append(mockMethod.desc());
+                builder.append("\n");
+            }
+            builder.append("\t").append("方法签名: ");
+            builder.append("\t")
+                    .append(methodSpec.method.getReturnType()).append(" ")
+                    .append(methodSpec.method.getName())
+                    .append(" (");
+            int length = methodSpec.getParameterTypes().length;
+            if (length > 0) {
+                for (int i = 0; i < length; i++) {
+                    Object argType = methodSpec.getParameterTypes()[i];
+                    builder.append("\n\t\t\t\t\t\t\t\t").append(MockClient.getTextFormatter().format(argType));
+                    if (i != length - 1) {
+                        builder.append(",");
+                    }
+                }
+                builder.append("\n\t\t\t\t\t\t\t").append(")");
+            } else {
                 builder.append(")");
             }
-            builder.append("\n");
-            builder.append("\u3000参数类型：");
-            builder.append(MockClient.getTextFormatter().format(methodSpec.getParameterTypes()));
-            builder.append("\n");
-            builder.append("返回值类型：");
-            builder.append(methodSpec.getReturnType());
+            //处理废弃方法
+            Deprecated deprecated = Utils.findMethodAnnotation(methodSpec.method, Deprecated.class);
+            if (deprecated != null) {
+                methodNameTv.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+            } else {
+                methodNameTv.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
+            }
             methodNameTv.setText(builder.toString());
             if (methodSpec.isExpand()) {
                 viewContainer.removeAllViews();

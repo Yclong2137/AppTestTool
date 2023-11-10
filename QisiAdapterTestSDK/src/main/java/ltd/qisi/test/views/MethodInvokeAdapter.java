@@ -1,5 +1,7 @@
 package ltd.qisi.test.views;
 
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import ltd.qisi.test.MockClient;
 import ltd.qisi.test.R;
 import ltd.qisi.test.bean.MethodInvokeInfo;
 
@@ -22,7 +25,6 @@ import java.util.List;
 public class MethodInvokeAdapter extends RecyclerView.Adapter<MethodInvokeAdapter.VH> {
 
     private final List<MethodInvokeInfo> infoList = new ArrayList<>();
-
 
 
     public MethodInvokeAdapter() {
@@ -57,15 +59,32 @@ public class MethodInvokeAdapter extends RecyclerView.Adapter<MethodInvokeAdapte
             return new VH(itemView);
         }
 
-        private TextView tvInfo;
+        private final TextView tvMethod;
 
         private VH(@NonNull View itemView) {
             super(itemView);
-            tvInfo = itemView.findViewById(R.id.tv_info);
+            tvMethod = itemView.findViewById(R.id.tv_method);
+            GradientDrawable background = new GradientDrawable();
+            background.setColor(Color.parseColor("#80333333"));
+            background.setCornerRadius(8);
+            itemView.setBackground(background);
         }
 
         void bind(MethodInvokeInfo info) {
-            tvInfo.setText(info.method.getName() + ">>>" + Arrays.toString(info.args));
+            StringBuilder sb = new StringBuilder();
+            sb.append(info.method.getReturnType()).append(" ");
+            sb.append(info.method.getName()).append(" ");
+            sb.append("(");
+            for (int i = 0; i < info.args.length; i++) {
+                Object arg = info.args[i];
+                sb.append("\n\t");
+                sb.append(MockClient.getTextFormatter().format(arg));
+                if (info.args.length - 1 != i) {
+                    sb.append(",");
+                }
+            }
+            sb.append("\n").append(")");
+            tvMethod.setText(sb);
         }
     }
 

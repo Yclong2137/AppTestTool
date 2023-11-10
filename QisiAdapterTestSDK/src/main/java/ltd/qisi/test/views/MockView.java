@@ -6,6 +6,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -42,8 +44,16 @@ public class MockView extends FrameLayout {
     private MethodAdapter methodAdapter;
     private MethodInvokeAdapter methodInvokeAdapter;
     /**
-     * 关键字
+     * 待测目标
      */
+    private Object target;
+
+    /**
+     * 是否包含废弃
+     */
+    private boolean hasDeprecated;
+
+
     private String key;
 
 
@@ -100,6 +110,14 @@ public class MockView extends FrameLayout {
                 autoTest();
             }
         });
+        CheckBox checkBox = findViewById(R.id.rb_deprecated);
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                hasDeprecated = isChecked;
+                execute(target);
+            }
+        });
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rvRight.setLayoutManager(layoutManager);
         methodAdapter = new MethodAdapter();
@@ -121,7 +139,7 @@ public class MockView extends FrameLayout {
             public void onTextChanged(String text) {
                 Log.i(TAG, "onTextChanged() called with: text = [" + text + "]");
                 key = text;
-                methodAdapter.setData(methodSpecs, text);
+                methodAdapter.setData(methodSpecs, key);
             }
         });
     }
@@ -134,7 +152,7 @@ public class MockView extends FrameLayout {
             @Override
             public void run() {
                 for (MethodSpec methodSpec : methodSpecs) {
-                    methodSpec.invoke(false);
+                    methodSpec.invoke(true);
                 }
             }
         });
@@ -176,6 +194,18 @@ public class MockView extends FrameLayout {
      */
     public void assignObject(Object target) {
         if (target == null) return;
+        this.target = target;
+        execute(target);
+
+
+    }
+
+    /**
+     * 执行操作
+     *
+     * @param target
+     */
+    private void execute(Object target) {
         mExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -183,13 +213,11 @@ public class MockView extends FrameLayout {
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        methodAdapter.setData(methodSpecs, null);
+                        methodAdapter.setData(methodSpecs, key);
                     }
                 });
             }
         });
-
-
     }
 
     private void handleMethods(Object target) {
@@ -197,15 +225,16 @@ public class MockView extends FrameLayout {
         Method[] methods;
         List<Method> result = new ArrayList<>();
         for (Method method : clazz.getMethods()) {
+            //排除Object类中方法
             if (method.getDeclaringClass() == Object.class) {
                 continue;
             }
-            //移除废弃方法
-            if (Utils.findMethodAnnotation(method, Deprecated.class) != null) {
+            //排除静态方法
+            if (Modifier.isStatic(method.getModifiers())) {
                 continue;
             }
-            //System.out.println(">>>>>>>getModifiers " + method.getModifiers());
-            if (Modifier.isStatic(method.getModifiers())) {
+            //排除废弃方法
+            if (!hasDeprecated && Utils.findMethodAnnotation(method, Deprecated.class) != null) {
                 continue;
             }
             result.add(method);
@@ -218,6 +247,7 @@ public class MockView extends FrameLayout {
             //HQLog.i(TAG, ">>>>>>>>>> sortedMethodNames " + sortedMethodNames);
             sortedMethod(sortedMethodNames, methods);
         }
+        methodSpecs.clear();
         for (Method method : methods) {
             methodSpecs.add(MethodSpec.create(target, method));
         }

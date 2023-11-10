@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <Button
+    <TextView
         android:id="@+id/button"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -12,7 +12,8 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:layout_weight="1"
-        android:background="@drawable/cl_wdg_buttonb_s"
+        android:gravity="center"
+        android:background="@null"
         android:text="按钮"
         android:textColor="@color/text_color_E0E0E0"
         android:textSize="28sp" />
