@@ -2,6 +2,7 @@ package ltd.qisi.test.views;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +25,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import ltd.qisi.test.FunctionModuleInterface;
@@ -42,7 +43,9 @@ public class MockView extends FrameLayout {
     private static final String TAG = "MockView";
 
     private MethodAdapter methodAdapter;
+
     private MethodInvokeAdapter methodInvokeAdapter;
+
     /**
      * 待测目标
      */
@@ -53,9 +56,20 @@ public class MockView extends FrameLayout {
      */
     private boolean hasDeprecated;
 
+    /**
+     * 是否包含执行错误
+     */
+    private boolean hasError;
 
+    /**
+     * 关键字
+     */
     private String key;
 
+    /**
+     * 元数据
+     */
+    private final List<MethodSpec> metaMethodSpecs = new ArrayList<>();
 
     private final List<MethodSpec> methodSpecs = new ArrayList<>();
 
@@ -63,7 +77,7 @@ public class MockView extends FrameLayout {
 
     TextView tvMethodArea;
 
-    private Executor mExecutor = Executors.newSingleThreadExecutor();
+    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
 
     public MockView(Context context) {
@@ -115,9 +129,19 @@ public class MockView extends FrameLayout {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 hasDeprecated = isChecked;
-                execute(target);
+                mExecutor.execute(new FilterResultRunnable());
             }
         });
+        hasDeprecated = checkBox.isChecked();
+        CheckBox errorCbView = findViewById(R.id.rb_error);
+        errorCbView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                hasError = isChecked;
+                mExecutor.execute(new FilterResultRunnable());
+            }
+        });
+        hasError = errorCbView.isChecked();
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rvRight.setLayoutManager(layoutManager);
         methodAdapter = new MethodAdapter();
@@ -137,9 +161,8 @@ public class MockView extends FrameLayout {
         searchInputView.setOnTextChangedListener(new SearchInputView.OnTextChangedListener() {
             @Override
             public void onTextChanged(String text) {
-                Log.i(TAG, "onTextChanged() called with: text = [" + text + "]");
                 key = text;
-                methodAdapter.setData(methodSpecs, key);
+                mExecutor.execute(new FilterResultRunnable());
             }
         });
     }
@@ -185,6 +208,7 @@ public class MockView extends FrameLayout {
         super.onDetachedFromWindow();
         Log.d(TAG, "onDetachedFromWindow() called");
         EventBus.getDefault().unregister(this);
+        mExecutor.shutdownNow();
     }
 
     /**
@@ -195,62 +219,86 @@ public class MockView extends FrameLayout {
     public void assignObject(Object target) {
         if (target == null) return;
         this.target = target;
-        execute(target);
-
-
+        mExecutor.execute(new HandleMethodsRunnable());
     }
 
     /**
-     * 执行操作
-     *
-     * @param target
+     * 顾虑错误结果
      */
-    private void execute(Object target) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                handleMethods(target);
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        methodAdapter.setData(methodSpecs, key);
-                    }
-                });
+    private final class FilterResultRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            methodSpecs.clear();
+            for (MethodSpec methodSpec : metaMethodSpecs) {
+                //过滤废弃方法
+                if (!hasDeprecated && methodSpec.getDeprecatedAnnotation() != null) {
+                    continue;
+                }
+                //过滤执行错误
+                if (hasError && (methodSpec.isPass() || !methodSpec.isExecuted())) {
+                    continue;
+                }
+                //过滤关键字
+                String keyword = methodSpec.getKeyword();
+                if (key != null && keyword != null && !keyword.toLowerCase().contains(key.toLowerCase())) {
+                    continue;
+                }
+                methodSpecs.add(methodSpec);
             }
-        });
+            notifyDataChanged();
+        }
     }
 
-    private void handleMethods(Object target) {
-        Class<?> clazz = target.getClass();
-        Method[] methods;
-        List<Method> result = new ArrayList<>();
-        for (Method method : clazz.getMethods()) {
-            //排除Object类中方法
-            if (method.getDeclaringClass() == Object.class) {
-                continue;
-            }
-            //排除静态方法
-            if (Modifier.isStatic(method.getModifiers())) {
-                continue;
-            }
-            //排除废弃方法
-            if (!hasDeprecated && Utils.findMethodAnnotation(method, Deprecated.class) != null) {
-                continue;
-            }
-            result.add(method);
-        }
-        methods = result.toArray(new Method[0]);
 
-        List<String> sortedMethodNames = null;
-        if (target instanceof FunctionModuleInterface) {
-            sortedMethodNames = ((FunctionModuleInterface) target).sortedMethodNames;
-            //HQLog.i(TAG, ">>>>>>>>>> sortedMethodNames " + sortedMethodNames);
-            sortedMethod(sortedMethodNames, methods);
+    /**
+     * 处理数据
+     */
+    private class HandleMethodsRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            Class<?> clazz = target.getClass();
+            Method[] methods;
+            List<Method> result = new ArrayList<>();
+            for (Method method : clazz.getMethods()) {
+                //排除Object类中方法
+                if (method.getDeclaringClass() == Object.class) {
+                    continue;
+                }
+                //排除静态方法
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+                result.add(method);
+            }
+            methods = result.toArray(new Method[0]);
+
+            List<String> sortedMethodNames = null;
+            if (target instanceof FunctionModuleInterface) {
+                sortedMethodNames = ((FunctionModuleInterface) target).sortedMethodNames;
+                sortedMethod(sortedMethodNames, methods);
+            }
+            metaMethodSpecs.clear();
+            for (Method method : methods) {
+                metaMethodSpecs.add(MethodSpec.create(target, method));
+            }
+            methodSpecs.addAll(metaMethodSpecs);
+            new FilterResultRunnable().run();
         }
-        methodSpecs.clear();
-        for (Method method : methods) {
-            methodSpecs.add(MethodSpec.create(target, method));
-        }
+    }
+
+    /**
+     * 通知数据刷新
+     */
+    private void notifyDataChanged() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                if (methodAdapter != null)
+                    methodAdapter.setData(methodSpecs);
+            }
+        });
     }
 
 

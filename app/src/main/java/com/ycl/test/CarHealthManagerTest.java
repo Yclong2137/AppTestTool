@@ -17,8 +17,9 @@ public class CarHealthManagerTest extends CarHealthManager1Test1 implements Func
 
     @MockMethod(desc = "testA(CAN)")
     @Override
+    @Deprecated
     public void testA() {
-
+        throw new NullPointerException("");
     }
 
 
@@ -30,7 +31,7 @@ public class CarHealthManagerTest extends CarHealthManager1Test1 implements Func
     @MockMethod(desc = "testBody")
     public void testBody(int a, @MockBody User user) {
         if (mICarHealthStateChangeLisener != null)
-            mICarHealthStateChangeLisener.onTestAbs(a, user,a);
+            mICarHealthStateChangeLisener.onTestAbs(a, user, a);
 
     }
 

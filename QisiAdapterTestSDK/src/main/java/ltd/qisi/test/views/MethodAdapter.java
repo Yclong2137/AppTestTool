@@ -40,38 +40,19 @@ import ltd.qisi.test.model.MethodSpec;
  */
 public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
-    private static final String TAG = "MethodAdapter";
 
-    private static final Handler sHandler = new android.os.Handler(Looper.getMainLooper());
-
-    private final List<MethodSpec> methodSpecs = new ArrayList<>();
+    private List<MethodSpec> methodSpecs;
 
     public MethodAdapter() {
     }
 
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setData(List<MethodSpec> methodSpecList, String key) {
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-            @Override
-            public void run() {
-                methodSpecs.clear();
-                for (MethodSpec methodSpec : methodSpecList) {
-                    String keyword = methodSpec.getKeyword();
-                    if (key == null || (keyword != null && keyword.toLowerCase().contains(key.toLowerCase()))) {
-                        methodSpecs.add(methodSpec);
-                    }
-                }
-                EventBus.getDefault().post(new MethodCountChangeEvent(methodSpecs.size()));
-                sHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        notifyDataSetChanged();
-                    }
-                });
-            }
-        });
-
+    public void setData(List<MethodSpec> methodSpecs) {
+        this.methodSpecs = methodSpecs;
+        if (methodSpecs == null) return;
+        EventBus.getDefault().post(new MethodCountChangeEvent(methodSpecs.size()));
+        notifyDataSetChanged();
     }
 
 
@@ -85,11 +66,13 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        if (methodSpecs == null) return;
         holder.bind(methodSpecs.get(position), null);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position, @NonNull List<Object> payloads) {
+        if (methodSpecs == null) return;
         holder.bind(methodSpecs.get(position), payloads);
     }
 
@@ -101,6 +84,7 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onChanged(MethodSpecChangeEvent event) {
+        if (methodSpecs == null) return;
         int index = this.methodSpecs.indexOf(event.methodSpec);
         notifyItemChanged(index, event);
     }
@@ -113,6 +97,7 @@ public class MethodAdapter extends RecyclerView.Adapter<MethodAdapter.VH> {
 
     @Override
     public int getItemCount() {
+        if (methodSpecs == null) return 0;
         return methodSpecs.size();
     }
 

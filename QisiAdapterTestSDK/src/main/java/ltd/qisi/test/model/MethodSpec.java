@@ -60,6 +60,8 @@ public class MethodSpec {
      */
     private final MockMethod mockMethod;
 
+    private final Deprecated deprecatedAnnotation;
+
 
     private final Class<?> returnType;
 
@@ -72,16 +74,38 @@ public class MethodSpec {
      */
     private boolean isExpand = true;
 
+    public boolean isExpand() {
+        return isExpand;
+    }
+
     /**
      * 搜索关键字
      */
     private String keyword;
 
-
     public String getKeyword() {
         return keyword;
     }
 
+    /**
+     * 执行结果
+     */
+    private boolean isPass;
+
+
+    public boolean isPass() {
+        return isPass;
+    }
+
+    /**
+     * 方法是否执行过
+     */
+    private boolean isExecuted;
+
+
+    public boolean isExecuted() {
+        return isExecuted;
+    }
 
     public Object[] getArgs() {
         return args;
@@ -93,6 +117,7 @@ public class MethodSpec {
         keyword += method.getName();
         this.returnType = method.getReturnType();
         mockMethod = Utils.findMethodAnnotation(method, MockMethod.class);
+        deprecatedAnnotation = Utils.findMethodAnnotation(method, Deprecated.class);
         if (mockMethod != null) {
             keyword += mockMethod.desc();
         }
@@ -141,10 +166,6 @@ public class MethodSpec {
 
     }
 
-    public boolean isExpand() {
-        return isExpand;
-    }
-
 
     public Class<?> getReturnType() {
         return returnType;
@@ -170,6 +191,11 @@ public class MethodSpec {
 
     public MockMethod getMockMethod() {
         return mockMethod;
+    }
+
+
+    public Deprecated getDeprecatedAnnotation() {
+        return deprecatedAnnotation;
     }
 
     /**
@@ -223,6 +249,7 @@ public class MethodSpec {
             try {
                 //校验参数
                 if (!verifyParameter(notify)) {
+                    isPass = false;
                     return null;
                 }
                 for (int i = 0; i < typeItems.length; i++) {
@@ -243,7 +270,7 @@ public class MethodSpec {
                 respText.append("成功 ").append(String.valueOf(resp));
                 respText.setSpan(new ForegroundColorSpan(Color.GREEN), 0, 2, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
                 EventBus.getDefault().post(new MethodSpecChangeEvent(this));
-
+                isPass = true;
                 return resp;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -251,6 +278,9 @@ public class MethodSpec {
                 respText.append("失败 ").append(MockClient.getTextFormatter().format(e));
                 respText.setSpan(new ForegroundColorSpan(Color.RED), 0, 2, Spanned.SPAN_EXCLUSIVE_INCLUSIVE);
                 EventBus.getDefault().post(new MethodSpecChangeEvent(this));
+                isPass = false;
+            } finally {
+                isExecuted = true;
             }
         }
         return null;

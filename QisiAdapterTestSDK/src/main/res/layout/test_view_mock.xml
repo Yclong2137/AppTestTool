@@ -69,7 +69,7 @@
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:hint="请输入"
-                android:minWidth="240dp"
+                android:minWidth="160dp"
                 android:paddingStart="12dp"
                 android:paddingTop="0dp"
                 android:paddingEnd="12dp"
@@ -86,11 +86,19 @@
 
             <CheckBox
                 android:id="@+id/rb_deprecated"
-                android:textColor="@color/white"
-                android:buttonTint="#FF6200EE"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="包含废弃" />
+                android:buttonTint="#FF6200EE"
+                android:text="包含废弃"
+                android:textColor="@color/white" />
+
+            <CheckBox
+                android:id="@+id/rb_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#FF6200EE"
+                android:text="执行错误"
+                android:textColor="@color/white" />
 
 
         </LinearLayout>
