@@ -112,7 +112,10 @@ public final class Utils {
     public static String getStackTraceString(Throwable t) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw, false);
-        t.printStackTrace(pw);
+        Throwable tCause = t.getCause();
+        if (tCause != null) {
+            tCause.printStackTrace(pw);
+        }
         pw.flush();
         return sw.toString();
     }
@@ -180,7 +183,7 @@ public final class Utils {
      */
     public static <T extends Annotation> T findMethodAnnotation(Method bridgeMethod, Class<T> annotationType) {
         boolean has = bridgeMethod.isAnnotationPresent(annotationType);
-        System.out.println("findMethodAnnotation() called with: bridgeMethod = [" + bridgeMethod + "], annotationType = [" + annotationType + "],has "+has);
+        System.out.println("findMethodAnnotation() called with: bridgeMethod = [" + bridgeMethod + "], annotationType = [" + annotationType + "],has " + has);
         if (!has) {
             Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
             while (superclass != null && Object.class != superclass) {

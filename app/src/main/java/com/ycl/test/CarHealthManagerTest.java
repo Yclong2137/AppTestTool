@@ -19,6 +19,7 @@ public class CarHealthManagerTest extends CarHealthManager1Test1 implements Func
     @Override
     @Deprecated
     public void testA() {
+        int a=1/0;
         throw new NullPointerException("");
     }
 
