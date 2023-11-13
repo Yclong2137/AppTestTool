@@ -1,14 +1,19 @@
 package ltd.qisi.test.items;
 
-import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -39,10 +44,80 @@ public class BodyTypeItem extends InputTypeItem<Object> {
     private static final Gson gson = new GsonBuilder()
             .serializeNulls()
             .setPrettyPrinting()
+            .registerTypeAdapterFactory(NullListToEmptyFactory.INSTANCE)
             .create();
 
 
     private final Class<?> parameterType;
+
+    static class NullListToEmptyFactory implements TypeAdapterFactory {
+
+        public static final NullListToEmptyFactory INSTANCE = new NullListToEmptyFactory();
+
+        private NullListToEmptyFactory() {
+
+        }
+
+
+        @Override
+        public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> typeToken) {
+            final Class<? super T> rawType = typeToken.getRawType();
+            Type type = typeToken.getType();
+            System.out.println("=====>>>>>>, type = " + type + ", rawType = " + rawType);
+            final TypeAdapter<T> delegateAdapter = gson.getDelegateAdapter(this, typeToken);
+            if (List.class.isAssignableFrom(rawType)) {
+                return new TypeAdapter<T>() {
+                    @Override
+                    public void write(JsonWriter out, T value) throws IOException {
+                        if (value == null || ((List<?>) value).isEmpty()) {
+                            out.beginArray().endArray();
+                        } else {
+                            delegateAdapter.write(out, value);
+                        }
+                    }
+
+                    @Override
+                    public T read(JsonReader in) throws IOException {
+                        return delegateAdapter.read(in);
+                    }
+                };
+            } else if (type instanceof GenericArrayType || type instanceof Class && ((Class<?>) type).isArray()) {
+                return new TypeAdapter<T>() {
+                    @Override
+                    public void write(JsonWriter out, T value) throws IOException {
+                        if (value == null) {
+                            out.beginArray().endArray();
+                        } else {
+                            delegateAdapter.write(out, value);
+                        }
+                    }
+
+                    @Override
+                    public T read(JsonReader in) throws IOException {
+                        return delegateAdapter.read(in);
+                    }
+                };
+            } else if (rawType == String.class) {
+                return new TypeAdapter<T>() {
+                    @Override
+                    public void write(JsonWriter out, T value) throws IOException {
+                        if (value == null) {
+                            out.value("");
+                        } else {
+                            delegateAdapter.write(out, value);
+                        }
+                    }
+
+                    @Override
+                    public T read(JsonReader in) throws IOException {
+                        return delegateAdapter.read(in);
+                    }
+                };
+            }
+            return null;
+        }
+    }
+
     /**
      * 参数类型
      */
