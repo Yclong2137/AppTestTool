@@ -27,6 +27,9 @@ public class MethodInvokeAdapter extends RecyclerView.Adapter<MethodInvokeAdapte
     private final List<MethodInvokeInfo> infoList = new ArrayList<>();
 
 
+    private RecyclerView mRecyclerView;
+
+
     public MethodInvokeAdapter() {
     }
 
@@ -48,8 +51,23 @@ public class MethodInvokeAdapter extends RecyclerView.Adapter<MethodInvokeAdapte
     }
 
     public void addItem(MethodInvokeInfo info) {
-        this.infoList.add(info);
-        this.notifyItemInserted(infoList.size() - 1);
+        this.infoList.add(0, info);
+        this.notifyItemInserted(0);
+        if (mRecyclerView != null) {
+            mRecyclerView.smoothScrollToPosition(0);
+        }
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        this.mRecyclerView = recyclerView;
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        this.mRecyclerView = null;
     }
 
     public static class VH extends RecyclerView.ViewHolder {

@@ -1,6 +1,9 @@
 package ltd.qisi.test.views;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -81,6 +84,8 @@ public class MockView extends FrameLayout {
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
 
+    private final Paint mPaint = new Paint();
+
     public MockView(Context context) {
         this(context, null);
     }
@@ -91,6 +96,9 @@ public class MockView extends FrameLayout {
 
     MockView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mPaint.setTextSize(24);
+        mPaint.setTextAlign(Paint.Align.CENTER);
+        mPaint.setAntiAlias(true);
         LayoutInflater.from(context).inflate(R.layout.test_view_mock, this);
         initMethodView(context);
         initMethodCallbackView(context);
@@ -101,18 +109,20 @@ public class MockView extends FrameLayout {
         rvLeft = findViewById(R.id.rv_method_callback);
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rvLeft.setLayoutManager(layoutManager);
-        layoutManager.setReverseLayout(true);
         methodInvokeAdapter = new MethodInvokeAdapter();
         rvLeft.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                super.getItemOffsets(outRect, view, parent, state);
-                outRect.left = Utils.dp2px(12);
-                outRect.right = Utils.dp2px(12);
-                outRect.top = Utils.dp2px(12);
-                outRect.bottom = Utils.dp2px(12);
-            }
-        });
+                                     @Override
+                                     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                                         super.getItemOffsets(outRect, view, parent, state);
+                                         outRect.left = Utils.dp2px(12);
+                                         outRect.right = Utils.dp2px(12);
+                                         outRect.top = Utils.dp2px(12);
+                                         outRect.bottom = Utils.dp2px(12);
+                                     }
+
+                                 }
+
+        );
         rvLeft.setAdapter(methodInvokeAdapter);
     }
 
@@ -154,6 +164,27 @@ public class MockView extends FrameLayout {
                 outRect.right = Utils.dp2px(12);
                 outRect.top = Utils.dp2px(12);
                 outRect.bottom = Utils.dp2px(12);
+            }
+
+            @Override
+            public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.onDrawOver(c, parent, state);
+                int itemCount = parent.getChildCount();
+                for (int index = 0; index < itemCount; index++) {
+                    View child = parent.getChildAt(index);
+                    int right = child.getRight() - parent.getPaddingLeft();
+                    int top = parent.getTop() + child.getTop();
+                    int radius = Utils.dp2px(16);
+                    int cx = right - radius;
+                    int cy = top + radius;
+                    mPaint.setColor(Color.RED);
+                    c.drawCircle(cx, cy, radius, mPaint);
+                    String text = String.valueOf(parent.getChildAdapterPosition(child) + 1);
+                    mPaint.setColor(Color.WHITE);
+                    Paint.FontMetrics fontMetrics = mPaint.getFontMetrics();
+                    float distance = (fontMetrics.bottom - fontMetrics.top) / 2 - fontMetrics.bottom;
+                    c.drawText(text, cx, cy + distance, mPaint);
+                }
             }
         });
         rvRight.setItemViewCacheSize(5);

@@ -58,11 +58,11 @@ public class BodyTypeItem extends InputTypeItem<Object> {
         template = gson.toJson(null, pType);
     }
 
-
     @Override
-    public String formatText() {
+    public Object defaultValue() {
         return template;
     }
+
 
     @Override
     public LinearLayout.LayoutParams getLayoutParams() {

@@ -37,27 +37,17 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
         inputView.setTextSize(18);
         inputView.clearFocus();
         hookView(inputView);
-        inputView.setText(String.valueOf(formatText()));
+        Object value = null;
+        if ((value = parameterInfo.value) != null || (value = defaultValue()) != null) {
+            inputView.setText(String.valueOf(value));
+        }
         return inputView;
     }
 
     protected void hookView(EditText inputView) {
 
     }
-
-
-    /**
-     * 格式化文本
-     */
-    public Object formatText() {
-        Class<?> parameterType = parameterInfo.parameterType;
-        if (parameterType != null) {
-            if (parameterType.isPrimitive() || Number.class.isAssignableFrom(parameterType)) {
-                return defaultValue();
-            }
-        }
-        return null;
-    }
+    
 
     /**
      * 输入文本
