@@ -12,16 +12,30 @@ import ltd.qisi.test.items.ParameterTypeItem;
 public final class MockClient {
 
 
-    private static TextFormatter sTextFormatter;
+    public static TextFormatter sTextFormatter;
+    /**
+     * 调试日志
+     */
+    public static boolean enableLog = true;
 
 
-    private static final Gson sGson = new GsonBuilder()
+    public static final Gson sGson = new GsonBuilder()
             .serializeNulls()
             .create();
 
 
     private MockClient() {
 
+    }
+
+    /**
+     * 打印日志
+     *
+     * @param msg 日志
+     */
+    public static void printLog(String msg) {
+        if (!enableLog) return;
+        System.out.println("--->>> " + msg);
     }
 
 
@@ -66,8 +80,6 @@ public final class MockClient {
             try {
                 if (Throwable.class.isAssignableFrom(clazz)) {
                     return Utils.getStackTraceString((Throwable) o);
-                } else if (Utils.isCommonType(clazz)) {
-                    return String.valueOf(o);
                 } else {
                     return sGson.toJson(o);
                 }

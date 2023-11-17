@@ -6,6 +6,8 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.widget.EditText;
 
+import java.util.Arrays;
+
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.ParameterInfo;
 
@@ -35,19 +37,26 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
         inputView.setTextSize(18);
         inputView.clearFocus();
         hookView(inputView);
-        try {
-            Object value;
-            if ((value = parameterInfo.value) != null || (value = defaultValue()) != null) {
-                inputView.setText(String.valueOf(value));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        inputView.setText(String.valueOf(formatText()));
         return inputView;
     }
 
     protected void hookView(EditText inputView) {
 
+    }
+
+
+    /**
+     * 格式化文本
+     */
+    public Object formatText() {
+        Class<?> parameterType = parameterInfo.parameterType;
+        if (parameterType != null) {
+            if (parameterType.isPrimitive() || Number.class.isAssignableFrom(parameterType)) {
+                return defaultValue();
+            }
+        }
+        return null;
     }
 
     /**

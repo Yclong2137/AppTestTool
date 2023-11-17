@@ -22,10 +22,7 @@ public class CarHealthManager1Test1 implements FunctionModuleInterface {
     }
 
 
-    @MockMethod(desc = "testArray(can)")
-    public void testArray(@MockBody(rawType = List.class, type = {User.class}) List<User> a) {
 
-    }
 
     @MockMethod(desc = "testBody")
     @Deprecated

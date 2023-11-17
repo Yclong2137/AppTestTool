@@ -37,6 +37,12 @@ android {
     }
 }
 
+//不使用缓存,因为使用的是snapshot的版本,maven随时可能都在更新库
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.2.0'

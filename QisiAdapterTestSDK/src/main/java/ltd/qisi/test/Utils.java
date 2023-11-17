@@ -30,78 +30,6 @@ public final class Utils {
 
     }
 
-    /**
-     * 是否为常用类型
-     *
-     * @param clazz 类型
-     */
-    public static boolean isCommonType(Class<?> clazz) {
-        if (clazz == null) {
-            return false;
-        }
-        if (clazz.isAnnotation()) {
-            return true;
-        }
-        if (clazz.isEnum()) {
-            return true;
-        }
-        if (clazz.isPrimitive()) {
-            return true;
-        }
-        if (clazz == String.class) {
-            return true;
-        }
-        if (clazz == Boolean.class) {
-            return true;
-        }
-        if (clazz == Character.class) {
-            return true;
-        }
-        if (clazz == Byte.class) {
-            return true;
-        }
-        if (clazz == Short.class) {
-            return true;
-        }
-        if (clazz == Integer.class) {
-            return true;
-        }
-        if (clazz == Long.class) {
-            return true;
-        }
-        if (clazz == Float.class) {
-            return true;
-        }
-        if (clazz == Double.class) {
-            return true;
-        }
-        if (clazz == Void.class) {
-            return true;
-        }
-        if (clazz.isArray()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 是否为对象类型
-     *
-     * @param clazz
-     * @return
-     */
-    public static boolean isInstance(Class<?> clazz) {
-        if (clazz == null) return false;
-        int mod = clazz.getModifiers();
-        if (Modifier.isInterface(mod)) {
-            return false;
-        }
-        if (Modifier.isAbstract(mod)) {
-            return false;
-        }
-        return !isCommonType(clazz);
-    }
 
     /**
      * 异常信息
@@ -115,54 +43,15 @@ public final class Utils {
         Throwable tCause = t.getCause();
         if (tCause != null) {
             tCause.printStackTrace(pw);
+        } else {
+            t.printStackTrace(pw);
         }
         pw.flush();
         return sw.toString();
     }
 
 
-    /**
-     * 格式化类的属性类型
-     *
-     * @param clazz
-     * @return
-     */
-    public static String formatClassFieldTypes(Class<?> clazz) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        builder.append(clazz.getName());
-        builder.append("]");
-        List<Field> fields = getClassSelfFields(clazz);
-        for (Field field : fields) {
-            builder.append(field.getType());
-            builder.append(",");
-        }
-        return builder.toString();
-    }
-
-    /**
-     * 获取类本身的私有成员变量
-     *
-     * @param clazz
-     * @return
-     */
-    public static List<Field> getClassSelfFields(Class<?> clazz) {
-        List<Field> fieldList = new ArrayList<>();
-        try {
-            Field[] fields = clazz.getDeclaredFields();
-            for (Field field : fields) {
-                if (field.getDeclaringClass() == Object.class) continue;
-                fieldList.add(field);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return fieldList;
-    }
-
-
-    public static Class<?> getGenericTypeClass(Class<?> clazz) {
-        Type type = clazz.getGenericSuperclass();
+    public static Class<?> getActualTypeArgument(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type[] types = parameterizedType.getActualTypeArguments();
@@ -183,7 +72,7 @@ public final class Utils {
      */
     public static <T extends Annotation> T findMethodAnnotation(Method bridgeMethod, Class<T> annotationType) {
         boolean has = bridgeMethod.isAnnotationPresent(annotationType);
-        System.out.println("findMethodAnnotation() called with: bridgeMethod = [" + bridgeMethod + "], annotationType = [" + annotationType + "],has " + has);
+        MockClient.printLog("findMethodAnnotation() called with: bridgeMethod = [" + bridgeMethod + "], annotationType = [" + annotationType + "],has " + has);
         if (!has) {
             Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
             while (superclass != null && Object.class != superclass) {

@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import ltd.qisi.test.FunctionModuleInterface;
+import ltd.qisi.test.MockClient;
 import ltd.qisi.test.R;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.MethodInvokeInfo;
@@ -344,7 +345,7 @@ public class MockView extends FrameLayout {
         for (Method method : methods) {
             sb.append(method.getName()).append(",");
         }
-        System.out.println(">>>>>>>>>> " + sb);
+        MockClient.printLog(sb.toString());
     }
 
 }

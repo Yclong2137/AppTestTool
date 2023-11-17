@@ -133,7 +133,8 @@ public class MethodSpec {
             parameterInfo.mockField = findMockAnnotation(parameterAnnotationArr, MockField.class);
             parameterInfo.mockBody = findMockAnnotation(parameterAnnotationArr, MockBody.class);
             try {
-                if (parameterInfo.mockBody != null) {
+                //增加对数组类型处理
+                if (parameterInfo.mockBody != null || parameterType.isArray()) {
                     BodyTypeItem bodyTypeItem = new BodyTypeItem(parameterInfo);
                     typeItems[i] = bodyTypeItem;
                 } else if (parameterType.isInterface()) {//处理接口类型参数
