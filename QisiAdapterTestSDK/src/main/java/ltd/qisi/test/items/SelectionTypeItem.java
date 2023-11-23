@@ -73,6 +73,10 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
         return spinner.getSelectedItem().toString();
     }
 
+    protected int getSelectedIndex() {
+        return spinner.getSelectedItemPosition();
+    }
+
     public class Entry {
 
         public String name;

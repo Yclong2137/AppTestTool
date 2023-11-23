@@ -16,6 +16,7 @@ import ltd.qisi.test.annotaitons.MockBody;
 import ltd.qisi.test.annotaitons.MockField;
 import ltd.qisi.test.annotaitons.MockMethod;
 import ltd.qisi.test.MockClient;
+import ltd.qisi.test.items.EnumTypeItem;
 import ltd.qisi.test.items.ParameterTypeItem;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.MethodInvokeInfo;
@@ -153,6 +154,8 @@ public class MethodSpec {
                         }
                     });
                     typeItems[i] = typeItem;
+                } else if (parameterType.isEnum()) {
+                    typeItems[i] = new EnumTypeItem(parameterInfo);
                 } else {
                     typeItems[i] = MockClient.getTypeItem(parameterType, parameterInfo);
                 }
