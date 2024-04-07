@@ -6,12 +6,17 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 
+import androidx.annotation.Nullable;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
+import ltd.qisi.test.FunctionModuleInterface;
 import ltd.qisi.test.annotaitons.MockBody;
 import ltd.qisi.test.annotaitons.MockField;
 import ltd.qisi.test.annotaitons.MockMethod;
@@ -31,18 +36,10 @@ import ltd.qisi.test.items.InterfaceTypeItem;
 public class MethodSpec {
 
 
-    public static MethodSpec create(Object caller, Method method) {
-        return new MethodSpec(caller, method);
+    public static MethodSpec create(Method method) {
+        return new MethodSpec(method);
     }
 
-    /**
-     * 参数
-     */
-    private final Object[] args;
-    /**
-     * 调用者
-     */
-    public Object caller;
     /**
      * 方法
      */
@@ -108,12 +105,7 @@ public class MethodSpec {
         return isExecuted;
     }
 
-    public Object[] getArgs() {
-        return args;
-    }
-
-    private MethodSpec(Object caller, Method method) {
-        this.caller = caller;
+    private MethodSpec(Method method) {
         this.method = method;
         keyword += method.getName();
         this.returnType = method.getReturnType();
@@ -123,7 +115,6 @@ public class MethodSpec {
             keyword += mockMethod.desc();
         }
         parameterTypes = method.getParameterTypes();
-        args = new Object[parameterTypes.length];
         typeItems = new ParameterTypeItem[parameterTypes.length];
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {
@@ -135,23 +126,16 @@ public class MethodSpec {
             parameterInfo.mockBody = findMockAnnotation(parameterAnnotationArr, MockBody.class);
             try {
                 //增加对数组类型处理
-                if (parameterInfo.mockBody != null || parameterType.isArray()) {
+                if (parameterInfo.mockBody != null || parameterType.isArray() || List.class.isAssignableFrom(parameterType) || Map.class.isAssignableFrom(parameterType)) {
                     BodyTypeItem bodyTypeItem = new BodyTypeItem(parameterInfo);
                     typeItems[i] = bodyTypeItem;
                 } else if (parameterType.isInterface()) {//处理接口类型参数
-                    InterfaceTypeItem typeItem = new InterfaceTypeItem(parameterInfo, new InvocationHandler() {
+                    InterfaceTypeItem typeItem = new InterfaceTypeItem(parameterInfo, new InterfaceTypeItem.InvokeCallback() {
                         @Override
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            if (method.getDeclaringClass() == Object.class) {
-                                //重写equals方法，保证返回为true（由于没有被代理对象，无法实现自定义equals方法）
-                                if ("equals".equals(method.getName())) {
-                                    return Boolean.TRUE;
-                                }
-                                return method.invoke(this, args);
-                            }
+                        public void invoke(Object proxy, Method method, Object[] args) {
                             EventBus.getDefault().post(MethodInvokeInfo.create(method, args));
-                            return null;
                         }
+
                     });
                     typeItems[i] = typeItem;
                 } else if (parameterType.isEnum()) {
@@ -248,7 +232,7 @@ public class MethodSpec {
     /**
      * 执行方法
      */
-    public Object invoke(boolean notify) {
+    public Object invoke(Object caller, boolean notify) {
         if (method != null) {
             try {
                 //校验参数
@@ -256,8 +240,14 @@ public class MethodSpec {
                     isPass = false;
                     return null;
                 }
+                Object[] args = new Object[parameterTypes.length];
                 for (int i = 0; i < typeItems.length; i++) {
                     ParameterTypeItem<?> typeItem = typeItems[i];
+                    if (typeItem instanceof InterfaceTypeItem) {
+                        if (caller instanceof FunctionModuleInterface) {
+                            ((InterfaceTypeItem) typeItem).setModuleInterface((FunctionModuleInterface) caller);
+                        }
+                    }
                     Object arg = typeItem.getValue();
                     Object defVal;
                     if (arg == null && (defVal = typeItem.defaultValue()) != null) {
@@ -276,7 +266,7 @@ public class MethodSpec {
                 EventBus.getDefault().post(new MethodSpecChangeEvent(this));
                 isPass = true;
                 return resp;
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
                 respText.clear();
                 respText.append("失败 ").append(MockClient.getTextFormatter().format(e));

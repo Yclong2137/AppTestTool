@@ -5,8 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.widget.EditText;
-
-import java.util.Arrays;
+import android.widget.LinearLayout;
 
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.ParameterInfo;
@@ -26,13 +25,13 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
 
 
     @Override
-    public View getView(Context context) {
+    protected View getView(Context context) {
         inputView = new EditText(context);
         GradientDrawable background = new GradientDrawable();
         background.setColor(Color.GRAY);
         background.setCornerRadius(6);
         inputView.setBackground(background);
-        inputView.setPadding(Utils.dp2px(12), Utils.dp2px(2), Utils.dp2px(12), Utils.dp2px(2));
+        inputView.setPadding(12, 2, 12, 2);
         inputView.setHint("请输入");
         inputView.setTextSize(18);
         inputView.clearFocus();
@@ -47,7 +46,12 @@ public abstract class InputTypeItem<T> extends ParameterTypeItem<T> {
     protected void hookView(EditText inputView) {
 
     }
-    
+
+    @Override
+    public LinearLayout.LayoutParams getLayoutParams() {
+        return new LinearLayout.LayoutParams(-1, 84);
+    }
+
 
     /**
      * 输入文本

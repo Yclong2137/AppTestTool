@@ -6,7 +6,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ltd.qisi.test.R;
-import ltd.qisi.test.annotaitons.Mock;
 import ltd.qisi.test.bean.ModuleInfo;
 
 public class FunctionModuleAdapter extends RecyclerView.Adapter<FunctionModuleAdapter.VH> {
@@ -67,7 +65,14 @@ public class FunctionModuleAdapter extends RecyclerView.Adapter<FunctionModuleAd
             } else {
                 button.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
             }
-            button.setText(moduleInfo.getModuleName());
+            String displayLabel = moduleInfo.getModuleName();
+            if (moduleClass != null) {
+                String className;
+                if (displayLabel != null && !displayLabel.equals(className = moduleClass.getSimpleName())) {
+                    displayLabel += "\n" + "(" + className + ")";
+                }
+            }
+            button.setText(displayLabel);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

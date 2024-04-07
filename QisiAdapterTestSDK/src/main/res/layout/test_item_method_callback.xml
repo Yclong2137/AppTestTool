@@ -11,8 +11,8 @@
         android:paddingHorizontal="8dp"
         android:paddingVertical="4dp"
         android:textColor="@color/white"
+        android:textIsSelectable="true"
         android:textSize="@dimen/dimens_text_size_common" />
-
 
 
 </LinearLayout>

@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,15 +23,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import ltd.qisi.test.FunctionModuleInterface;
-import ltd.qisi.test.MockClient;
 import ltd.qisi.test.R;
 import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.MethodInvokeInfo;
@@ -53,7 +48,7 @@ public class MockView extends FrameLayout {
     /**
      * 待测目标
      */
-    private Object target;
+    private Object caller;
 
     /**
      * 是否包含废弃
@@ -83,8 +78,9 @@ public class MockView extends FrameLayout {
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
+    private final ExecutorService mWorkExecutor = Executors.newCachedThreadPool();
 
-    private final Paint mPaint = new Paint();
+    private final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public MockView(Context context) {
         this(context, null);
@@ -96,7 +92,7 @@ public class MockView extends FrameLayout {
 
     MockView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mPaint.setTextSize(24);
+        mPaint.setTextSize(36);
         mPaint.setTextAlign(Paint.Align.CENTER);
         mPaint.setAntiAlias(true);
         LayoutInflater.from(context).inflate(R.layout.test_view_mock, this);
@@ -111,18 +107,15 @@ public class MockView extends FrameLayout {
         rvLeft.setLayoutManager(layoutManager);
         methodInvokeAdapter = new MethodInvokeAdapter();
         rvLeft.addItemDecoration(new RecyclerView.ItemDecoration() {
-                                     @Override
-                                     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                                         super.getItemOffsets(outRect, view, parent, state);
-                                         outRect.left = Utils.dp2px(12);
-                                         outRect.right = Utils.dp2px(12);
-                                         outRect.top = Utils.dp2px(12);
-                                         outRect.bottom = Utils.dp2px(12);
-                                     }
-
-                                 }
-
-        );
+            @Override
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                super.getItemOffsets(outRect, view, parent, state);
+                outRect.left = 12;
+                outRect.right = 12;
+                outRect.top = 12;
+                outRect.bottom = 12;
+            }
+        });
         rvLeft.setAdapter(methodInvokeAdapter);
     }
 
@@ -156,14 +149,20 @@ public class MockView extends FrameLayout {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
         rvRight.setLayoutManager(layoutManager);
         methodAdapter = new MethodAdapter();
+        methodAdapter.setItemViewClickListener(new MethodAdapter.OnItemViewClickListener() {
+            @Override
+            public void onItemViewClick(View view, MethodSpec methodSpec) {
+                if (methodSpec != null) methodSpec.invoke(caller, true);
+            }
+        });
         rvRight.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 super.getItemOffsets(outRect, view, parent, state);
-                outRect.left = Utils.dp2px(12);
-                outRect.right = Utils.dp2px(12);
-                outRect.top = Utils.dp2px(12);
-                outRect.bottom = Utils.dp2px(12);
+                outRect.left = 12;
+                outRect.right = 12;
+                outRect.top = 12;
+                outRect.bottom = 12;
             }
 
             @Override
@@ -174,7 +173,7 @@ public class MockView extends FrameLayout {
                     View child = parent.getChildAt(index);
                     int right = child.getRight() - parent.getPaddingLeft();
                     int top = parent.getTop() + child.getTop();
-                    int radius = Utils.dp2px(16);
+                    int radius = 32;
                     int cx = right - radius;
                     int cy = top + radius;
                     mPaint.setColor(Color.RED);
@@ -203,14 +202,14 @@ public class MockView extends FrameLayout {
      * 自动化测试所有接口
      */
     private void autoTest() {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                for (MethodSpec methodSpec : methodSpecs) {
-                    methodSpec.invoke(true);
+        for (MethodSpec methodSpec : methodSpecs) {
+            mWorkExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    methodSpec.invoke(caller, true);
                 }
-            }
-        });
+            });
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -246,11 +245,11 @@ public class MockView extends FrameLayout {
     /**
      * 关联对象
      *
-     * @param target
+     * @param caller
      */
-    public void assignObject(Object target) {
-        if (target == null) return;
-        this.target = target;
+    public void assignObject(Object caller) {
+        if (caller == null) return;
+        this.caller = caller;
         mExecutor.execute(new HandleMethodsRunnable());
     }
 
@@ -290,31 +289,8 @@ public class MockView extends FrameLayout {
 
         @Override
         public void run() {
-            Class<?> clazz = target.getClass();
-            Method[] methods;
-            List<Method> result = new ArrayList<>();
-            for (Method method : clazz.getMethods()) {
-                //排除Object类中方法
-                if (method.getDeclaringClass() == Object.class) {
-                    continue;
-                }
-                //排除静态方法
-                if (Modifier.isStatic(method.getModifiers())) {
-                    continue;
-                }
-                result.add(method);
-            }
-            methods = result.toArray(new Method[0]);
-
-            List<String> sortedMethodNames = null;
-            if (target instanceof FunctionModuleInterface) {
-                sortedMethodNames = ((FunctionModuleInterface) target).sortedMethodNames;
-                sortedMethod(sortedMethodNames, methods);
-            }
             metaMethodSpecs.clear();
-            for (Method method : methods) {
-                metaMethodSpecs.add(MethodSpec.create(target, method));
-            }
+            metaMethodSpecs.addAll(Utils.getMethodSpecs(caller));
             methodSpecs.addAll(metaMethodSpecs);
             new FilterResultRunnable().run();
         }
@@ -333,50 +309,5 @@ public class MockView extends FrameLayout {
         });
     }
 
-
-    /**
-     * 排序方法
-     *
-     * @param methodNames 有序方法名称集合
-     * @param methods     无需方法集合
-     */
-    private void sortedMethod(List<String> methodNames, Method[] methods) {
-        if (methodNames == null || methods == null) return;
-        //print(methods);
-        //已排序区间|待排序区间
-        int sortedIndex = 0;//排序索引
-        for (int i = 0; i < methodNames.size(); i++) {
-            int j = findMethod(methodNames.get(i), sortedIndex, methods);
-            if (j != -1) {
-                swap(sortedIndex, j, methods);
-                sortedIndex += 1;
-            }
-        }
-        //print(methods);
-    }
-
-    private int findMethod(String name, int startIndex, Method[] methods) {
-        for (int i = startIndex; i < methods.length; i++) {
-            Method method = methods[i];
-            if (method.getName().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private void swap(int i, int j, Method[] methods) {
-        Method tmp = methods[i];
-        methods[i] = methods[j];
-        methods[j] = tmp;
-    }
-
-    private void print(Method[] methods) {
-        StringBuilder sb = new StringBuilder();
-        for (Method method : methods) {
-            sb.append(method.getName()).append(",");
-        }
-        MockClient.printLog(sb.toString());
-    }
 
 }

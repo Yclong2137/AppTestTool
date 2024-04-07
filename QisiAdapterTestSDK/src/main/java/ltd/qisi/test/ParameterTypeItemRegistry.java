@@ -2,6 +2,7 @@ package ltd.qisi.test;
 
 
 import ltd.qisi.test.items.BooleanTypeItem;
+import ltd.qisi.test.items.ByteTypeItem;
 import ltd.qisi.test.items.DoubleTypeItem;
 import ltd.qisi.test.items.FloatTypeItem;
 import ltd.qisi.test.items.IntTypeItem;
@@ -36,6 +37,7 @@ final class ParameterTypeItemRegistry {
         registerParameterType(short.class, ShortTypeItem.class);
         registerParameterType(long.class, LongTypeItem.class);
         registerParameterType(boolean.class, BooleanTypeItem.class);
+        registerParameterType(byte.class, ByteTypeItem.class);
         //引用数据类型
         registerParameterType(Integer.class, IntTypeItem.class);
         registerParameterType(Double.class, DoubleTypeItem.class);
@@ -44,6 +46,7 @@ final class ParameterTypeItemRegistry {
         registerParameterType(Long.class, LongTypeItem.class);
         registerParameterType(String.class, StringTypeItem.class);
         registerParameterType(Boolean.class, BooleanTypeItem.class);
+        registerParameterType(Byte.class, ByteTypeItem.class);
     }
 
     /**

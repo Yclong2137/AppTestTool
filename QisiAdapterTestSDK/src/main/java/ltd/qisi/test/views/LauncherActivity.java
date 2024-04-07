@@ -32,8 +32,8 @@ public class LauncherActivity extends ActivityBase {
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.left = Utils.dp2px(24);
-                outRect.right = Utils.dp2px(24);
+                outRect.left = 24;
+                outRect.right = 24;
             }
         });
         LinearLayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -43,8 +43,8 @@ public class LauncherActivity extends ActivityBase {
 
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.top = Utils.dp2px(8);
-                outRect.bottom = Utils.dp2px(8);
+                outRect.top =  8;
+                outRect.bottom = 8;
             }
         });
         FunctionModuleAdapter adapter = new FunctionModuleAdapter();

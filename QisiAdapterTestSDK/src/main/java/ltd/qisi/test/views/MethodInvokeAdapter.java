@@ -10,14 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.List;
 
 import ltd.qisi.test.MockClient;
 import ltd.qisi.test.R;
 import ltd.qisi.test.bean.MethodInvokeInfo;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Yclong
@@ -89,20 +87,25 @@ public class MethodInvokeAdapter extends RecyclerView.Adapter<MethodInvokeAdapte
         }
 
         void bind(MethodInvokeInfo info) {
+            if (info == null) return;
             StringBuilder sb = new StringBuilder();
             sb.append(info.method.getReturnType()).append(" ");
             sb.append(info.method.getName()).append(" ");
             sb.append("(");
-            for (int i = 0; i < info.args.length; i++) {
-                Object arg = info.args[i];
-                sb.append("\n\t");
-                sb.append(MockClient.getTextFormatter().format(arg));
-                if (info.args.length - 1 != i) {
-                    sb.append(",");
+            if (info.args != null) {
+                for (int i = 0; i < info.args.length; i++) {
+                    Object arg = info.args[i];
+                    sb.append("\n\t");
+                    sb.append(MockClient.getTextFormatter().format(arg));
+                    if (info.args.length - 1 != i) {
+                        sb.append(",");
+                    }
                 }
             }
             sb.append("\n").append(")");
-            tvMethod.setText(sb);
+            if (tvMethod != null) {
+                tvMethod.setText(sb);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package ltd.qisi.test.views;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -11,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import ltd.qisi.test.R;
+import ltd.qisi.test.Utils;
 
 
 public abstract class ActivityBase extends AppCompatActivity {
@@ -25,6 +27,7 @@ public abstract class ActivityBase extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.test_base_layout);
+        Utils.setCustomDensity(this, getApplication());
         initTopBar();
         initView();
     }
@@ -63,5 +66,15 @@ public abstract class ActivityBase extends AppCompatActivity {
             titleView.setText(title);
         }
     }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            View v = getCurrentFocus();
+            if (v != null) v.clearFocus();
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
 
 }

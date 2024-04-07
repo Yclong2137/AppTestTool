@@ -6,67 +6,35 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-
-    <TextView
-        android:id="@+id/tv_method_name"
+    <ltd.qisi.test.views.TextMethodElementView
+        android:id="@+id/element_method_remarks"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="40dp"
-        android:textIsSelectable="true"
-        android:textColor="@color/white"
-        android:textSize="@dimen/dimens_text_size_common" />
+        android:visibility="gone" />
 
+    <ltd.qisi.test.views.TextMethodElementView
+        android:id="@+id/element_method_signature"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
-        android:id="@+id/v_container"
+        android:id="@+id/element_container_parameter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:orientation="vertical" />
 
-    <LinearLayout
+    <ltd.qisi.test.views.TextMethodElementView
+        android:id="@+id/element_req"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_marginTop="6dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="\t请求参数: "
-            android:textColor="@color/white"
-            android:textSize="@dimen/dimens_text_size_common" />
-
-        <TextView
-            android:id="@+id/tv_req_result"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/white"
-            android:textSize="@dimen/dimens_text_size_common" />
-
-    </LinearLayout>
-
-
-    <LinearLayout
+    <ltd.qisi.test.views.TextMethodElementView
+        android:id="@+id/element_resp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="\t请求结果: "
-            android:textColor="@color/white"
-            android:textSize="@dimen/dimens_text_size_common" />
-
-        <TextView
-            android:id="@+id/tv_resp_result"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/white"
-            android:textSize="@dimen/dimens_text_size_common" />
-
-    </LinearLayout>
+        android:layout_marginTop="6dp" />
 
 
     <LinearLayout
@@ -85,9 +53,9 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:layout_gravity="end"
+            android:backgroundTint="#FF6200EE"
             android:text="测试"
             android:textColor="@color/white"
-            android:backgroundTint="#FF6200EE"
             tools:ignore="TouchTargetSizeCheck" />
 
     </LinearLayout>

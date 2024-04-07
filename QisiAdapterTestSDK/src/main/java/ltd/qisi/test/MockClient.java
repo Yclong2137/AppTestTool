@@ -16,7 +16,7 @@ public final class MockClient {
     /**
      * 调试日志
      */
-    public static boolean enableLog = true;
+    public static boolean enableLog = false;
 
 
     public static final Gson sGson = new GsonBuilder()
@@ -99,12 +99,12 @@ public final class MockClient {
         @Override
         public String format(Object[] args) {
             String result = null;
-            try {
-                result = sGson.toJson(args);
-            } catch (Exception e) {
-                //e.printStackTrace();
-                result = Arrays.toString(args);
-            }
+//            try {
+//                result = sGson.toJson(args);
+//            } catch (Exception e) {
+            //e.printStackTrace();
+            result = Arrays.toString(args);
+//            }
             return result;
         }
     };

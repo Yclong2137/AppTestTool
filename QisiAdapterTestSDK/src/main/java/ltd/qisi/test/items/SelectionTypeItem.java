@@ -5,12 +5,14 @@ import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import ltd.qisi.test.Utils;
 import ltd.qisi.test.bean.ParameterInfo;
 
 /**
@@ -29,7 +31,7 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
 
 
     @Override
-    public View getView(Context context) {
+    protected View getView(Context context) {
         spinner = new Spinner(context);
         GradientDrawable background = new GradientDrawable();
         background.setColor(Color.GRAY);
@@ -63,6 +65,11 @@ public abstract class SelectionTypeItem<T> extends ParameterTypeItem<T> {
 
     protected void hookView(Spinner spinner) {
 
+    }
+
+    @Override
+    public LinearLayout.LayoutParams getLayoutParams() {
+        return new LinearLayout.LayoutParams(-1, 84);
     }
 
 

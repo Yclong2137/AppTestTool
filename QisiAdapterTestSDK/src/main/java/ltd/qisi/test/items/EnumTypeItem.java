@@ -5,6 +5,9 @@ import java.util.List;
 
 import ltd.qisi.test.bean.ParameterInfo;
 
+/**
+ * 通用枚举
+ */
 public class EnumTypeItem extends SelectionTypeItem<Object> {
 
     private final List<Entry> entries = new ArrayList<>();

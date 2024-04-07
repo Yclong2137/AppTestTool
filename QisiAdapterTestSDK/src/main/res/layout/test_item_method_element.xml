@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:background="@color/color_gray">
+
+
+    <TextView
+        android:id="@+id/label_view"
+        android:layout_width="120dp"
+        android:layout_height="32dp"
+        android:ellipsize="end"
+        android:gravity="center|end"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textSize="17dp"
+        tools:text="参数0：" />
+
+
+</LinearLayout>

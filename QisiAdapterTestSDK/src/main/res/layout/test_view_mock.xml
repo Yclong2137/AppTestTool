@@ -63,13 +63,12 @@
 
             <ltd.qisi.test.views.SearchInputView
                 android:id="@+id/search_view"
-                android:layout_width="wrap_content"
+                android:layout_width="200dp"
                 android:layout_height="36dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
                 android:hint="请输入"
-                android:minWidth="160dp"
                 android:paddingStart="12dp"
                 android:paddingTop="0dp"
                 android:paddingEnd="12dp"
@@ -81,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="12dp"
                 android:backgroundTint="#FF6200EE"
-                android:text="自动化测试"
+                android:text="自动化压测"
                 android:textColor="@color/white" />
 
             <CheckBox
